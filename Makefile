@@ -1,7 +1,8 @@
 CC := cc
 NAME := ft_nm
 SRCS_DIR := srcs/
-SOURCES :=	nm.c
+SOURCES :=	nm.c	\
+			file.c	\
 
 SOURCES	:=	$(addprefix $(SRCS_DIR), $(SOURCES))
 
