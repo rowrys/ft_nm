@@ -32,4 +32,8 @@ set_option_stat(size_t* options, uint8_t option_pos, bool state) {
 	*options = (state) ? *options | option_pos : *options & ~option_pos;
 }
 
+# define OFFSET_EHDR(is_x64, attribute) (offsetof(Elf64_Ehdr, attribute) * is_x64) + (offsetof(Elf32_Ehdr, attribute) * !is_x64)
+# define OFFSET_SHDR(is_x64, attribute) (offsetof(Elf64_Shdr, attribute) * is_x64) + (offsetof(Elf32_Shdr, attribute) * !is_x64)
+# define OFFSET_PHDR(is_x64, attribute) (offsetof(Elf64_Phdr, attribute) * is_x64) + (offsetof(Elf32_Phdr, attribute) * !is_x64)
+
 #endif
