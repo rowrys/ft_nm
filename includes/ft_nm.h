@@ -16,6 +16,7 @@ typedef struct s_ctx {
 	size_t	nb_binary;				/* numbers of binary to analyse.*/
 	char**	binary_file_path;		/* file path of the binary.		*/
 	size_t	options;				/* store the differents option	*/
+	int		exit_code;				/* exit code of ft_nm			*/
 }	t_ctx;
 
 typedef enum e_nm_options {

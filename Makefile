@@ -4,6 +4,7 @@ SRCS_DIR := srcs/
 SOURCES :=	nm.c		\
 			file.c		\
 			arguments.c	\
+			parse_elf.c	\
 
 SOURCES	:=	$(addprefix $(SRCS_DIR), $(SOURCES))
 
