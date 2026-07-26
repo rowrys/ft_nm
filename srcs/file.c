@@ -1,5 +1,5 @@
 
-#include "ft_nm.h"
+#include "file.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,9 +9,8 @@
 
 #include <sys/mman.h>
 
-void*
-map_file(char* file_path) {
-	uchar*		result;
+void
+map_file(t_file* file, char* file_path) {
 	int			fd;
 	struct stat	stat;
 
@@ -25,11 +24,11 @@ map_file(char* file_path) {
 		close(fd);
 		exit(1);
 	}
-	result = mmap(NULL, stat.st_size, PROT_READ, MAP_SHARED, fd, 0);
+	file->size = stat.st_size;
+	file->buffer = mmap(NULL, stat.st_size, PROT_READ, MAP_SHARED, fd, 0);
 	close(fd);
-	if (result == MAP_FAILED) {
+	if (file->buffer == MAP_FAILED) {
 		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG);
 		exit(1);
 	}
-	return (result);
 }
