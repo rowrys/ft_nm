@@ -10,11 +10,14 @@
 # include <elf.h>
 
 typedef struct s_elf_info {
+	uint64_t	shoff;
 	uint16_t	nb_phdr;
 	uint16_t	nb_shdr;
 	uint16_t	size_phdr;
 	uint16_t	size_shdr;
+	uint16_t	shstrndx;
 	bool		is_x64;
+
 } t_elf_info;
 
 static inline bool

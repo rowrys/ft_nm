@@ -43,17 +43,33 @@ static bool get_elf_info(t_elf_info* elf_info, t_file* file, t_ctx* ctx, char* f
 }
 
 static void
+parse_shdr(t_elf_info* elf_info, t_file* file) {
+	Elf64_Shdr*	shdr;
+	Elf64_Shdr*	strtab;
+	size_t		shdr_off;
+
+	memcpy(&shdr_off, ptr_add(file->buffer, OFFSET_EHDR(elf_info->is_x64, e_shoff)), (8 >> !elf_info->is_x64));
+	shdr = ptr_add(file->buffer, shdr_off);
+	strtab = ptr_add(shdr, elf_info->shstrndx * sizeof(Elf64_Shdr));
+	for (size_t i = 0; i < elf_info->nb_shdr; ++i) {
+		printf("type{%d}\n", shdr->sh_type);
+		printf("section name:{%s}:\n", (char*)(ptr_add(file->buffer, strtab->sh_offset + shdr->sh_name)));
+		shdr = ptr_add(shdr, elf_info->size_shdr);
+	}
+}
+
+static void
 parse_elf(t_ctx* ctx, t_file* file, char* file_path) {
-	t_elf_info	elf_info;
+	t_elf_info		elf_info = { 0 };
 
 	if (get_elf_info(&elf_info, file, ctx, file_path))
 		return ;
+	
+	memcpy(&elf_info.shoff, ptr_add(file->buffer, OFFSET_EHDR(elf_info.is_x64, e_shoff)), sizeof(uint64_t) >> !elf_info.is_x64);
+	memcpy(&elf_info.shstrndx, ptr_add(file->buffer, OFFSET_EHDR(elf_info.is_x64, e_shstrndx)), 2);
 
-	printf("nb programme hdr{%d}\n", elf_info.nb_phdr);
-	printf("size programme hdr{%d}\n", elf_info.size_phdr);
-	printf("nb section hdr{%d}\n", elf_info.nb_shdr);
-	printf("size section hdr{%d}\n", elf_info.size_shdr);
-	// parse_shdr(file, elf_info.is_x64, elf_info.nb_phdr);
+	parse_shdr(&elf_info, file);
+
 	printf("%s:\n", file_path);
 	return ;
 }
