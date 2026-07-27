@@ -1,5 +1,6 @@
 
-#include "file.h"
+# include "ft_nm.h"
+# include "file.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,7 +26,7 @@ map_file(t_file* file, char* file_path) {
 		exit(1);
 	}
 	file->size = stat.st_size;
-	file->buffer = mmap(NULL, stat.st_size, PROT_READ, MAP_SHARED, fd, 0);
+	file->buffer = mmap(NULL, stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	close(fd);
 	if (file->buffer == MAP_FAILED) {
 		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG);

@@ -1,6 +1,7 @@
 #ifndef PARSE_ELF_H
 # define PARSE_ELF_H
 
+# include "ft_nm.h"
 # include "file.h"
 
 # include <stdbool.h>
