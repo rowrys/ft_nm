@@ -61,8 +61,10 @@ parse_sym_hdr(t_elf_info* elf_info, t_file* file, Elf64_Sym* sym_hdr, Elf64_Shdr
 	tmp = get_section_hdr_by_index(ptr_add(file->buffer, elf_info->shoff), s_symtab->sh_link);
 	offset = tmp->sh_offset;
 	for (size_t i = 0; i < nb_entry; ++i) {
-		if (((char *)ptr_add(file->buffer, offset + sym_hdr->st_name))[0])
+		if (((char *)ptr_add(file->buffer, offset + sym_hdr->st_name))[0]) {
+			printf("%.16zx ", sym_hdr->st_value);
 			printf("%s\n", (char *)ptr_add(file->buffer, offset + sym_hdr->st_name));
+		}
 		sym_hdr = ptr_add(sym_hdr, s_symtab->sh_entsize);
 	}
 }
