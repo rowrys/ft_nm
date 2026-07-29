@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <elf.h>
 
 # define DEFAULT_FILE_PATH "a.out"
 # define DEFAULT_ERROR_MSG "nm: FATAL\n"
@@ -40,6 +41,11 @@ ptr_add(void* ptr, size_t n) {
 static inline void*
 ptr_sub(void* ptr, size_t n) {
 	return ((uchar*)ptr - n);
+}
+
+static inline Elf64_Shdr*
+get_section_hdr_by_index(void* section_hdr_tab, uint32_t idx) {
+	return (ptr_add(section_hdr_tab, sizeof(Elf64_Shdr) * idx));
 }
 
 # define OFFSET_EHDR(is_x64, attribute) (offsetof(Elf64_Ehdr, attribute) * is_x64) + (offsetof(Elf32_Ehdr, attribute) * !is_x64)
