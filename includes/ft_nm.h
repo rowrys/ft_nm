@@ -43,14 +43,9 @@ ptr_sub(void* ptr, size_t n) {
 	return ((uchar*)ptr - n);
 }
 
-static inline Elf64_Shdr*
-get_section_hdr_by_index(void* section_hdr_tab, uint32_t idx) {
-	return (ptr_add(section_hdr_tab, sizeof(Elf64_Shdr) * idx));
+static inline void*
+get_s_hdr_by_index(void* section_hdr_tab, uint32_t idx, bool is_x64) {
+	return (is_x64 == 1 ? ptr_add(section_hdr_tab, sizeof(Elf64_Shdr) * idx) : ptr_add(section_hdr_tab, sizeof(Elf32_Shdr) * idx));
 }
-
-# define OFFSET_EHDR(is_x64, attribute) (offsetof(Elf64_Ehdr, attribute) * is_x64) + (offsetof(Elf32_Ehdr, attribute) * !is_x64)
-# define OFFSET_SHDR(is_x64, attribute) (offsetof(Elf64_Shdr, attribute) * is_x64) + (offsetof(Elf32_Shdr, attribute) * !is_x64)
-# define OFFSET_PHDR(is_x64, attribute) (offsetof(Elf64_Phdr, attribute) * is_x64) + (offsetof(Elf32_Phdr, attribute) * !is_x64)
-# define OFFSET_SYMP(is_x64, attribute) (offsetof(Elf64_Sym, attribute) * is_x64) + (offsetof(Elf32_Sym, attribute) * !is_x64)
 
 #endif

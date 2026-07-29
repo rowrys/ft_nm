@@ -3,4 +3,5 @@ ft_nm
 compile_commands.json
 .build
 TODO.md
+test.c
 a.out
