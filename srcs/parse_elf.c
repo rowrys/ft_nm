@@ -53,21 +53,43 @@ get_elf_info(t_elf_info* elf_info, t_file* file) {
 	memcpy(&elf_info->shoff, ptr_add(file->buffer, OFFSET_EHDR(elf_info->is_x64, e_shoff)), sizeof(uint64_t) >> !elf_info->is_x64);
 }
 
-// static char
-// get_symbos_type(t_elf_info* elf_info, t_file* file, Elf64_Sym* sym_hdr) {
-// 	Elf64_Shdr*	symbol_relation_section;
+// static char*
+// get_nane_of_s_hdr(void* s_hdr, t_file* file, t_elf_info* elf_info) {
+// 	void*		s_hdr_strtab;
+// 	uint32_t	s_hdr_name;
+// 	uint64_t	s_hdr_strtab_offset;
 
-// 	(void)elf_info;
-// 	symbol_relation_section = ptr_add(file->buffer, sym_hdr->st_shndx);
-// 	printf("type{%d}", sym_hdr->st_shndx);
-// 	switch (symbol_relation_section->sh_type) {
-// 		case SHT_NOBITS:
-// 			return ('b');
-// 	}
-// 	if (ELF32_ST_BIND(sym_hdr->st_info) == STB_WEAK)
-// 		return ('w');
-// 	return ('?');
+// 	shdrcpy_name(&s_hdr_name, s_hdr, elf_info->is_x64);
+// 	s_hdr_strtab = get_s_hdr_by_index(ptr_add(file->buffer, elf_info->shoff), elf_info->shstrndx, elf_info->is_x64);
+// 	shdrcpy_offset(&s_hdr_strtab_offset, s_hdr_strtab, elf_info->is_x64);
+// 	return (ptr_add(file->buffer, s_hdr_strtab_offset + s_hdr_name));
 // }
+
+static char
+get_symbos_type(t_elf_info* elf_info, t_file* file, void* sym_hdr) {
+	void*		symbol_relation_section;		/* Elf64_Shdr/Elf32_Shdr */
+	bool		is_maj;
+	uint32_t	s_hdr_type;
+	uint16_t	sym_hdr_shndx;
+	uchar		sym_hdr_info;
+
+	symhdrcpy_info(&sym_hdr_info, sym_hdr, elf_info->is_x64);
+	symhdrcpy_shndx(&sym_hdr_shndx, sym_hdr, elf_info->is_x64);
+	is_maj = (ELF32_ST_BIND(sym_hdr_info) == STB_GLOBAL);
+	if (sym_hdr_shndx >= elf_info->nb_shdr)
+		return ('U' - (32 * is_maj));
+	symbol_relation_section = get_s_hdr_by_index(ptr_add(file->buffer, elf_info->shoff), sym_hdr_shndx, elf_info->is_x64);
+	shdrcpy_type(&s_hdr_type, symbol_relation_section, elf_info->is_x64);
+	switch (s_hdr_type) {
+		case SHT_NOBITS:
+			return ('b' - (32 * is_maj));
+		// case SHT_PROGBITS: // .data .text dD tT
+			// return ('d' - (32 * is_maj));
+	}
+	if (ELF32_ST_BIND(sym_hdr_info) == STB_WEAK)
+		return ('w' - (32 * is_maj));
+	return ('?');
+}
 
 static uint64_t
 get_nb_entry(void* s_hdr, bool is_x64) {
@@ -93,10 +115,10 @@ parse_sym_hdr(t_elf_info* elf_info, t_file* file, void* sym_hdr, void* s_symtab)
 	shdrcpy_entsize(&s_hdr_entsize, s_symtab, elf_info->is_x64);
 	for (size_t i = 0; i < nb_entry; ++i) {
 		symhdrcpy_name(&sym_hdr_name, sym_hdr, elf_info->is_x64);
-		if (((char *)ptr_add(file->buffer, offset + sym_hdr_name))[0]) {
+		if (((char *)ptr_add(file->buffer, offset + sym_hdr_name))[0] /*&& ((Elf64_Sym*)(sym_hdr))->st_shndx != SHN_UNDEF*/) {
 			symhdrcpy_value(&sym_hdr_value, sym_hdr, elf_info->is_x64);
 			printf("%.16zx ", sym_hdr_value);
-			// printf("%c ", get_symbos_type(elf_info, file, sym_hdr));
+			printf("%c ", get_symbos_type(elf_info, file, sym_hdr));
 			printf("%s\n", (char *)ptr_add(file->buffer, offset + sym_hdr_name));
 		}
 		sym_hdr = ptr_add(sym_hdr, s_hdr_entsize);

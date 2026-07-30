@@ -45,6 +45,10 @@ shdrcpy_link(uint32_t* s_hdr_link, void* s_hdr, bool is_x64) {
 	memcpy(s_hdr_link, ptr_add(s_hdr, OFFSET_SHDR(is_x64, sh_link)), sizeof(uint32_t));
 }
 
+static inline void
+shdrcpy_name(uint32_t* s_hdr_name, void* s_hdr, bool is_x64) {
+	memcpy(s_hdr_name, ptr_add(s_hdr, OFFSET_SHDR(is_x64, sh_name)), sizeof(uint32_t));
+}
 
 /**
  * @brief Elf_Sym headers utils.
@@ -59,6 +63,16 @@ static inline void
 symhdrcpy_value(uint64_t* value, void* sym_hdr, bool is_x64) {
 	*value = 0;
 	memcpy(value, ptr_add(sym_hdr, OFFSET_SYM(is_x64, st_value)), sizeof(uint64_t) >> !is_x64);
+}
+
+static inline void
+symhdrcpy_shndx(uint16_t* sym_hdr_shndx, void* sym_hdr, bool is_x64) {
+	memcpy(sym_hdr_shndx, ptr_add(sym_hdr, OFFSET_SYM(is_x64, st_shndx)), sizeof(uint16_t));
+}
+
+static inline void
+symhdrcpy_info(uchar* sym_hdr_info, void* sym_hdr, bool is_x64) {
+	memcpy(sym_hdr_info, ptr_add(sym_hdr, OFFSET_SYM(is_x64, st_info)), sizeof(uchar));
 }
 
 #endif
