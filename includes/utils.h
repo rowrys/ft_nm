@@ -50,6 +50,12 @@ shdrcpy_name(uint32_t* s_hdr_name, void* s_hdr, bool is_x64) {
 	memcpy(s_hdr_name, ptr_add(s_hdr, OFFSET_SHDR(is_x64, sh_name)), sizeof(uint32_t));
 }
 
+static inline void
+shdrcpy_flags(uint64_t* s_hdr_flags, void* s_hdr, bool is_x64) {
+	*s_hdr_flags = 0;
+	memcpy(s_hdr_flags, ptr_add(s_hdr, OFFSET_SHDR(is_x64, sh_flags)), sizeof(uint32_t));
+}
+
 /**
  * @brief Elf_Sym headers utils.
  */

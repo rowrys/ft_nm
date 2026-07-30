@@ -1,10 +1,11 @@
 CC := cc
 NAME := ft_nm
 SRCS_DIR := srcs/
-SOURCES :=	nm.c		\
-			file.c		\
-			arguments.c	\
-			parse_elf.c	\
+SOURCES :=	nm.c			\
+			file.c			\
+			arguments.c		\
+			parse_elf.c		\
+			symbols_type.c	\
 
 SOURCES	:=	$(addprefix $(SRCS_DIR), $(SOURCES))
 
