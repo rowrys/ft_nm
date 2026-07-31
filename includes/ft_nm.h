@@ -1,6 +1,8 @@
 #ifndef FT_NM_H
 # define FT_NM_H
 
+# include "symbols_info.h"
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -14,10 +16,12 @@
 typedef unsigned char uchar;
 
 typedef struct s_ctx {
-	size_t	nb_binary;				/* numbers of binary to analyse.*/
-	char**	binary_file_path;		/* file path of the binary.		*/
-	size_t	options;				/* store the differents option	*/
-	int		exit_code;				/* exit code of ft_nm			*/
+	size_t			nb_binary;				/* numbers of binary to analyse.*/
+	char**			binary_file_path;		/* file path of the binary.		*/
+	size_t			options;				/* store the differents option	*/
+	t_symbol_info*	symbols_info;			/* tab of symbol_info			*/
+	size_t			symbols_info_len;		/* lenght of symbols_info		*/
+	int				exit_code;				/* exit code of ft_nm			*/
 }	t_ctx;
 
 typedef enum e_nm_options {

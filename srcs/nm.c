@@ -8,6 +8,7 @@
 void
 destoy_ctx(t_ctx* ctx)  {
 	free(ctx->binary_file_path);
+	free(ctx->symbols_info);
 }
 
 int

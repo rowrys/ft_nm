@@ -6,6 +6,7 @@ SOURCES :=	nm.c			\
 			arguments.c		\
 			parse_elf.c		\
 			symbols_type.c	\
+			symbols_info.c	\
 
 SOURCES	:=	$(addprefix $(SRCS_DIR), $(SOURCES))
 
