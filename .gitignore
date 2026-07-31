@@ -4,4 +4,5 @@ compile_commands.json
 .build
 TODO.md
 test.c
+test.o
 a.out
