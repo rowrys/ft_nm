@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
 
@@ -35,11 +36,38 @@ add_symbol_info(t_ctx* ctx, uint64_t value, char type, char* name) {
 	++ctx->symbols_info_len;
 }
 
+static void
+swapn(void* addr1, void* addr2, uint16_t size) {
+	char	tmp[size];
+
+	memcpy(tmp, addr1, size);
+	memcpy(addr1, addr2, size);
+	memcpy(addr2, tmp, size);
+}
+
+static void
+sort_symbols(t_ctx* ctx) {
+	size_t	idx_lower;
+
+	for (size_t i = 0; i < ctx->symbols_info_len; ++i) {
+		idx_lower = i;
+		for (size_t j = i + 1; j < ctx->symbols_info_len; j++) {
+			if (strcmp(ctx->symbols_info[idx_lower].symbol_name, ctx->symbols_info[j].symbol_name) > 0)
+				idx_lower = j;
+		}
+		swapn(&ctx->symbols_info[i], &ctx->symbols_info[idx_lower], sizeof(t_symbol_info));
+	}
+}
+
 void
 display_symbols_info(t_ctx* ctx) {
+	sort_symbols(ctx);
 	for (size_t i = 0; i < ctx->symbols_info_len; ++i) {
 		if (ctx->symbols_info[i].need_to_be_display) {
-			printf("%.16zx ", ctx->symbols_info[i].symbol_value);
+			if (ctx->symbols_info[i].symbol_type == 'U' || ctx->symbols_info[i].symbol_type == 'w')
+				printf("                 ");
+			else
+				printf("%.16zx ", ctx->symbols_info[i].symbol_value);
 			printf("%c ", ctx->symbols_info[i].symbol_type);
 			printf("%s\n", ctx->symbols_info[i].symbol_name);
 		}
