@@ -27,18 +27,21 @@ init_symbols_info(t_ctx* ctx, t_file* file, void* s_hdr, bool is_x64) {
 }
 
 void
-add_symbol_info(t_symbol_info* symbols_info, size_t idx, uint64_t value, char type, char* name) {
-	symbols_info[idx].symbol_value = value;
-	symbols_info[idx].symbol_type = type;
-	symbols_info[idx].symbol_name = name;
-	symbols_info[idx].need_to_be_display = (type != '*');
+add_symbol_info(t_ctx* ctx, uint64_t value, char type, char* name) {
+	ctx->symbols_info[ctx->symbols_info_len].symbol_value = value;
+	ctx->symbols_info[ctx->symbols_info_len].symbol_type = type;
+	ctx->symbols_info[ctx->symbols_info_len].symbol_name = name;
+	ctx->symbols_info[ctx->symbols_info_len].need_to_be_display = (type != '*');
+	++ctx->symbols_info_len;
 }
 
 void
 display_symbols_info(t_ctx* ctx) {
 	for (size_t i = 0; i < ctx->symbols_info_len; ++i) {
-		printf("%.16zx ", ctx->symbols_info[i].symbol_value);
-		printf("%c ", ctx->symbols_info[i].symbol_type);
-		printf("%s\n", ctx->symbols_info[i].symbol_name);
+		if (ctx->symbols_info[i].need_to_be_display) {
+			printf("%.16zx ", ctx->symbols_info[i].symbol_value);
+			printf("%c ", ctx->symbols_info[i].symbol_type);
+			printf("%s\n", ctx->symbols_info[i].symbol_name);
+		}
 	}
 }

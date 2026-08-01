@@ -2,6 +2,7 @@
 #include "file.h"
 #include "ft_nm.h"
 #include "parse_elf.h"
+#include "symbols_info.h"
 #include "symbols_type.h"
 #include "utils.h"
 
@@ -65,7 +66,7 @@ get_nb_entry(void* s_hdr, bool is_x64) {
 }
 
 static void
-parse_sym_hdr(t_elf_info* elf_info, t_file* file, void* sym_hdr, void* s_symtab) {
+parse_sym_hdr(t_ctx* ctx, t_elf_info* elf_info, t_file* file, void* sym_hdr, void* s_symtab) {
 	size_t const	nb_entry = get_nb_entry(s_symtab, elf_info->is_x64);
 	uint64_t		offset;
 	uint32_t		sym_hdr_name;
@@ -76,20 +77,19 @@ parse_sym_hdr(t_elf_info* elf_info, t_file* file, void* sym_hdr, void* s_symtab)
 	shdrcpy_link(&s_hdr_link, s_symtab, elf_info->is_x64);
 	shdrcpy_offset(&offset, get_s_hdr_by_index(ptr_add(file->buffer, elf_info->shoff), s_hdr_link, elf_info->is_x64), elf_info->is_x64);
 	shdrcpy_entsize(&s_hdr_entsize, s_symtab, elf_info->is_x64);
+	ctx->symbols_info_len = 0;
 	for (size_t i = 0; i < nb_entry; ++i) {
 		symhdrcpy_name(&sym_hdr_name, sym_hdr, elf_info->is_x64);
-		if (((char *)ptr_add(file->buffer, offset + sym_hdr_name))[0] /*&& ((Elf64_Sym*)(sym_hdr))->st_shndx != SHN_UNDEF*/) {
+		if (((char *)ptr_add(file->buffer, offset + sym_hdr_name))[0]) {
 			symhdrcpy_value(&sym_hdr_value, sym_hdr, elf_info->is_x64);
-			printf("%.16zx ", sym_hdr_value);
-			printf("%c ", get_symbos_type(elf_info, file, sym_hdr));
-			printf("%s\n", (char *)ptr_add(file->buffer, offset + sym_hdr_name));
+			add_symbol_info(ctx, sym_hdr_value, get_symbos_type(elf_info, file, sym_hdr), ptr_add(file->buffer, offset + sym_hdr_name));
 		}
 		sym_hdr = ptr_add(sym_hdr, s_hdr_entsize);
 	}
 }
 
 static void
-parse_section_hdr(t_elf_info* elf_info, t_file* file) {
+parse_section_hdr(t_ctx* ctx, t_elf_info* elf_info, t_file* file) {
 	void*		s_hdr;			/* Elf64_Shdr / Elf32_Shdr */
 	uint32_t	s_hdr_type;
 	uint64_t	s_hdr_offset;
@@ -99,7 +99,8 @@ parse_section_hdr(t_elf_info* elf_info, t_file* file) {
 		shdrcpy_type(&s_hdr_type, s_hdr, elf_info->is_x64);
 		if (s_hdr_type == SHT_SYMTAB) {
 			shdrcpy_offset(&s_hdr_offset, s_hdr, elf_info->is_x64);
-			parse_sym_hdr(elf_info, file, ptr_add(file->buffer, s_hdr_offset), s_hdr);
+			init_symbols_info(ctx, file, s_hdr, elf_info->is_x64);
+			parse_sym_hdr(ctx, elf_info, file, ptr_add(file->buffer, s_hdr_offset), s_hdr);
 		}
 		s_hdr = ptr_add(s_hdr, elf_info->size_shdr);
 	}
@@ -114,7 +115,7 @@ parse_elf(t_ctx* ctx, t_file* file, char* file_path) {
 	if (ctx->nb_binary != 1)
 		printf("%s:\n", file_path);
 	get_elf_info(&elf_info, file);
-	parse_section_hdr(&elf_info, file);
+	parse_section_hdr(ctx, &elf_info, file);
 }
 
 void
@@ -126,6 +127,7 @@ parse_all_elf(t_ctx* ctx) {
 		parse_elf(ctx, &file, ctx->binary_file_path[i]);
 		if (i != ctx->nb_binary - 1 && ctx->nb_binary != 1)
 			printf("\n");
+		display_symbols_info(ctx);
 		munmap(file.buffer, file.size);
 	}
 }

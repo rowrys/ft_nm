@@ -4,7 +4,7 @@
 # include "file.h"
 
 # include <stdbool.h>
-#include <stddef.h>
+# include <stddef.h>
 # include <stdint.h>
 
 typedef struct s_ctx t_ctx;
@@ -17,7 +17,7 @@ typedef struct s_symbol_info {
 }	t_symbol_info;
 
 void	init_symbols_info(t_ctx* ctx, t_file* file, void* s_hdr, bool is_x64);
-void	add_symbol_info(t_symbol_info* symbols_info, size_t idx, uint64_t value, char type, char* name);
+void	add_symbol_info(t_ctx* ctx, uint64_t value, char type, char* name);
 void	display_symbols_info(t_ctx* ctx);
 
 #endif
