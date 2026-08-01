@@ -13,6 +13,10 @@
 # define OFFSET_PHDR(is_x64, attribute) (is_x64 == 1 ? offsetof(Elf64_Phdr, attribute) : offsetof(Elf32_Phdr, attribute))
 # define OFFSET_SYM(is_x64, attribute)  (is_x64 == 1 ? offsetof(Elf64_Sym, attribute)  : offsetof(Elf32_Sym, attribute))
 
+# define ELF_ST_BIND(val)			ELF32_ST_BIND(val)
+# define ELF_ST_TYPE(val)			ELF32_ST_TYPE(val)
+# define ELF_ST_INFO(bind, type)	ELF32_ST_INFO(bind, type)
+
 /**
  * @brief Elf_Shdr headers utils.
  */
