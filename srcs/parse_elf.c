@@ -80,7 +80,7 @@ parse_sym_hdr(t_ctx* ctx, t_elf_info* elf_info, t_file* file, void* sym_hdr, voi
 	ctx->symbols_info_len = 0;
 	for (size_t i = 0; i < nb_entry; ++i) {
 		symhdrcpy_name(&sym_hdr_name, sym_hdr, elf_info->is_x64);
-		if (((char *)ptr_add(file->buffer, offset + sym_hdr_name))[0]) {
+		if (i && (((char *)ptr_add(file->buffer, offset + sym_hdr_name))[0] || get_option_stat(ctx->options, OPT_A))) {
 			symhdrcpy_value(&sym_hdr_value, sym_hdr, elf_info->is_x64);
 			add_symbol_info(ctx, sym_hdr_value, get_symbos_type(ctx, elf_info, file, sym_hdr), ptr_add(file->buffer, offset + sym_hdr_name));
 		}
