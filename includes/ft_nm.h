@@ -37,6 +37,11 @@ set_option_stat(size_t* options, uint8_t option_pos, bool state) {
 	*options = (state) ? *options | option_pos : *options & ~option_pos;
 }
 
+static inline bool
+get_option_stat(size_t options, uint8_t option_id) {
+	return (options & option_id);
+}
+
 static inline void*
 ptr_add(void* ptr, size_t n) {
 	return ((uchar*)ptr + n);

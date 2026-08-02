@@ -82,7 +82,7 @@ parse_sym_hdr(t_ctx* ctx, t_elf_info* elf_info, t_file* file, void* sym_hdr, voi
 		symhdrcpy_name(&sym_hdr_name, sym_hdr, elf_info->is_x64);
 		if (((char *)ptr_add(file->buffer, offset + sym_hdr_name))[0]) {
 			symhdrcpy_value(&sym_hdr_value, sym_hdr, elf_info->is_x64);
-			add_symbol_info(ctx, sym_hdr_value, get_symbos_type(elf_info, file, sym_hdr), ptr_add(file->buffer, offset + sym_hdr_name));
+			add_symbol_info(ctx, sym_hdr_value, get_symbos_type(ctx, elf_info, file, sym_hdr), ptr_add(file->buffer, offset + sym_hdr_name));
 		}
 		sym_hdr = ptr_add(sym_hdr, s_hdr_entsize);
 	}
