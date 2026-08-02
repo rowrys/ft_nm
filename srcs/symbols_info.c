@@ -32,7 +32,7 @@ add_symbol_info(t_ctx* ctx, uint64_t value, char type, char* name) {
 	ctx->symbols_info[ctx->symbols_info_len].symbol_value = value;
 	ctx->symbols_info[ctx->symbols_info_len].symbol_type = type;
 	ctx->symbols_info[ctx->symbols_info_len].symbol_name = name;
-	ctx->symbols_info[ctx->symbols_info_len].need_to_be_display = (type != '*');
+	ctx->symbols_info[ctx->symbols_info_len].need_to_be_display = (type != SYMBOL_TYPE_NON_PRINTABLE);
 	++ctx->symbols_info_len;
 }
 

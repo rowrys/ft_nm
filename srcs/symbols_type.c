@@ -4,6 +4,7 @@
 #include "ft_nm.h"
 #include "utils.h"
 #include "parse_elf.h"
+#include <stdint.h>
 
 static char
 get_type_from_progbits(t_elf_info* elf_info, void* symbol_relation_section) {
@@ -38,7 +39,34 @@ get_gnu_symbols(uint16_t sym_hdr_shndx) {
 		case SHN_COMMON:
 			return ('C');
 	}
-	return ('*');
+	return ('?');
+}
+
+static char
+get_specifique_symbol_type(t_ctx* ctx, t_elf_info* elf_info, uint16_t sym_hdr_shndx, uchar sym_hdr_info) {
+	if (sym_hdr_info == STT_FILE) {
+		if (get_option_stat(ctx->options, OPT_A))
+			return ('a');
+		return (SYMBOL_TYPE_NON_PRINTABLE);
+	}
+	if (sym_hdr_shndx > elf_info->nb_shdr)
+		return (get_gnu_symbols(sym_hdr_shndx));
+	if (ELF_ST_BIND(sym_hdr_info) == STB_WEAK)
+		return (get_weak_symbols(sym_hdr_shndx, sym_hdr_info));
+	if (ELF_ST_TYPE(sym_hdr_info) == STT_GNU_IFUNC)
+		return ('i');
+	return (0);
+}
+
+static char
+get_symbol_type_from_s_hdr(void* symbol_relation_section, uint32_t s_hdr_type, t_elf_info* elf_info, bool is_maj) {
+	switch (s_hdr_type) {
+		case SHT_NOBITS:
+			return (convert_gloal_symbol('b', is_maj));
+		case SHT_PROGBITS: case SHT_NOTE: case SHT_DYNAMIC: case SHT_INIT_ARRAY: case SHT_FINI_ARRAY:
+			return (convert_gloal_symbol(get_type_from_progbits(elf_info, symbol_relation_section), is_maj));
+	}
+	return (convert_gloal_symbol('u', is_maj));
 }
 
 char
@@ -49,26 +77,16 @@ get_symbos_type(t_ctx* ctx, t_elf_info* elf_info, t_file* file, void* sym_hdr) {
 	uint32_t	s_hdr_name;
 	uint16_t	sym_hdr_shndx;
 	uchar		sym_hdr_info;
+	char		result;
 
 	symhdrcpy_info(&sym_hdr_info, sym_hdr, elf_info->is_x64);
 	symhdrcpy_shndx(&sym_hdr_shndx, sym_hdr, elf_info->is_x64);
 	is_maj = (ELF32_ST_BIND(sym_hdr_info) & STB_GLOBAL);
-	if (!get_option_stat(ctx->options, OPT_A) && sym_hdr_info == STT_FILE)
-		return ('*');
-	if (sym_hdr_shndx > elf_info->nb_shdr)
-		return (get_gnu_symbols(sym_hdr_shndx));
+	result = get_specifique_symbol_type(ctx, elf_info, sym_hdr_shndx, sym_hdr_info);
+	if (result)
+		return (result);
 	symbol_relation_section = get_s_hdr_by_index(ptr_add(file->buffer, elf_info->shoff), sym_hdr_shndx, elf_info->is_x64);
 	shdrcpy_type(&s_hdr_type, symbol_relation_section, elf_info->is_x64);
 	shdrcpy_name(&s_hdr_name, symbol_relation_section,  elf_info->is_x64);
-	if (ELF_ST_BIND(sym_hdr_info) == STB_WEAK)
-		return (get_weak_symbols(sym_hdr_shndx, sym_hdr_info));
-	if (ELF_ST_TYPE(sym_hdr_info) == STT_GNU_IFUNC)
-		return ('i');
-	switch (s_hdr_type) {
-		case SHT_NOBITS:
-			return (convert_gloal_symbol('b', is_maj));
-		case SHT_PROGBITS: case SHT_NOTE: case SHT_DYNAMIC: case SHT_INIT_ARRAY: case SHT_FINI_ARRAY:
-			return (convert_gloal_symbol(get_type_from_progbits(elf_info, symbol_relation_section), is_maj));
-	}
-	return (convert_gloal_symbol('u', is_maj));
+	return (get_symbol_type_from_s_hdr(symbol_relation_section, s_hdr_type, elf_info, is_maj));
 }

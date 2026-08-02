@@ -7,6 +7,8 @@
 # include <stddef.h>
 # include <stdint.h>
 
+# define SYMBOL_TYPE_NON_PRINTABLE '*'
+
 typedef struct s_ctx t_ctx;
 
 typedef struct s_symbol_info {
