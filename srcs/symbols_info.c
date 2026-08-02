@@ -74,8 +74,10 @@ sort_symbols_value(t_ctx* ctx) {
 
 void
 display_symbols_info(t_ctx* ctx) {
-	sort_symbols_name(ctx);
-	sort_symbols_value(ctx);
+	if (!get_option_stat(ctx->options, OPT_P)) {
+		sort_symbols_name(ctx);
+		sort_symbols_value(ctx);
+	}
 	for (size_t i = 0; i < ctx->symbols_info_len; ++i) {
 		if (ctx->symbols_info[i].need_to_be_display) {
 			if (ctx->symbols_info[i].symbol_type == 'U' || ctx->symbols_info[i].symbol_type == 'w')
