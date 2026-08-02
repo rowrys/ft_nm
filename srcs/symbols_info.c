@@ -47,13 +47,17 @@ swapn(void* addr1, void* addr2, uint16_t size) {
 }
 
 static void
-sort_symbols_name(t_ctx* ctx) {
+sort_symbols_name(t_ctx* ctx, bool swap) {
 	size_t	idx_lower;
+	bool	cond_result;
 
 	for (size_t i = 0; i < ctx->symbols_info_len; ++i) {
 		idx_lower = i;
-		for (size_t j = i + 1; j < ctx->symbols_info_len; j++)
-			idx_lower = (strcmp(ctx->symbols_info[idx_lower].symbol_name, ctx->symbols_info[j].symbol_name) > 0) ? j : idx_lower;
+		for (size_t j = i + 1; j < ctx->symbols_info_len; j++) {
+			cond_result = strcmp(ctx->symbols_info[idx_lower].symbol_name, ctx->symbols_info[j].symbol_name) > 0; 
+			cond_result = (swap) ? !cond_result : cond_result;
+			idx_lower = (cond_result) ? j : idx_lower;
+		}
 		if (i != idx_lower)
 			swapn(&ctx->symbols_info[i], &ctx->symbols_info[idx_lower], sizeof(t_symbol_info));
 	}
@@ -75,7 +79,7 @@ sort_symbols_value(t_ctx* ctx) {
 void
 display_symbols_info(t_ctx* ctx) {
 	if (!get_option_stat(ctx->options, OPT_P)) {
-		sort_symbols_name(ctx);
+		sort_symbols_name(ctx, get_option_stat(ctx->options, OPT_R));
 		sort_symbols_value(ctx);
 	}
 	for (size_t i = 0; i < ctx->symbols_info_len; ++i) {
