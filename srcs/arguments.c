@@ -67,6 +67,14 @@ set_binarys_path(t_ctx* ctx, char** argv) {
 	}
 }
 
+static void
+set_flags_priority(size_t* options) {
+	if (get_option_stat(*options, OPT_U))
+		*options = *options & ~(OPT_A | OPT_G);
+	else if (get_option_stat(*options, OPT_G))
+		*options = *options & ~OPT_A;
+}
+
 void
 parse_argument(t_ctx* ctx, char** argv) {
 
@@ -80,4 +88,5 @@ parse_argument(t_ctx* ctx, char** argv) {
 		set_binarys_path(ctx, argv);
 	else
 		set_default_binary_path(ctx);
+	set_flags_priority(&ctx->options);
 }

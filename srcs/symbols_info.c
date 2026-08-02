@@ -22,6 +22,7 @@ init_symbols_info(t_ctx* ctx, t_file* file, void* s_hdr, bool is_x64) {
 	ctx->symbols_info = malloc(sizeof(t_symbol_info) * ctx->symbols_info_len);
 	if (!ctx->symbols_info) {
 		munmap(file->buffer, file->size);
+		free(ctx->binary_file_path);
 		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG);
 		exit(1);
 	}

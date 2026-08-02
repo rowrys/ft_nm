@@ -17,7 +17,7 @@ map_file(t_file* file, char* file_path) {
 
 	fd = open(file_path, O_RDONLY);
 	if (fd == -1) {
-		dprintf(STDERR_FILENO, "nm: '%s': No such file", file_path);
+		dprintf(STDERR_FILENO, "nm: '%s': No such file\n", file_path);
 		exit(1);
 	}
 	if (fstat(fd, &stat)) {
