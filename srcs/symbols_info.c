@@ -46,22 +46,35 @@ swapn(void* addr1, void* addr2, uint16_t size) {
 }
 
 static void
-sort_symbols(t_ctx* ctx) {
+sort_symbols_name(t_ctx* ctx) {
 	size_t	idx_lower;
 
 	for (size_t i = 0; i < ctx->symbols_info_len; ++i) {
 		idx_lower = i;
-		for (size_t j = i + 1; j < ctx->symbols_info_len; j++) {
-			if (strcmp(ctx->symbols_info[idx_lower].symbol_name, ctx->symbols_info[j].symbol_name) > 0)
-				idx_lower = j;
-		}
-		swapn(&ctx->symbols_info[i], &ctx->symbols_info[idx_lower], sizeof(t_symbol_info));
+		for (size_t j = i + 1; j < ctx->symbols_info_len; j++)
+			idx_lower = (strcmp(ctx->symbols_info[idx_lower].symbol_name, ctx->symbols_info[j].symbol_name) > 0) ? j : idx_lower;
+		if (i != idx_lower)
+			swapn(&ctx->symbols_info[i], &ctx->symbols_info[idx_lower], sizeof(t_symbol_info));
+	}
+}
+
+static void
+sort_symbols_value(t_ctx* ctx) {
+	size_t	idx_lower;
+
+	for (size_t i = 0; i < ctx->symbols_info_len; ++i) {
+		idx_lower = i;
+		for (size_t j = i + 1; j < ctx->symbols_info_len && !strcmp(ctx->symbols_info[idx_lower].symbol_name, ctx->symbols_info[j].symbol_name); ++j)
+			idx_lower = (ctx->symbols_info[j].symbol_value < ctx->symbols_info[idx_lower].symbol_value) ? j : idx_lower;
+		if (idx_lower != i)
+			swapn(&ctx->symbols_info[i], &ctx->symbols_info[idx_lower], sizeof(t_symbol_info));
 	}
 }
 
 void
 display_symbols_info(t_ctx* ctx) {
-	sort_symbols(ctx);
+	sort_symbols_name(ctx);
+	sort_symbols_value(ctx);
 	for (size_t i = 0; i < ctx->symbols_info_len; ++i) {
 		if (ctx->symbols_info[i].need_to_be_display) {
 			if (ctx->symbols_info[i].symbol_type == 'U' || ctx->symbols_info[i].symbol_type == 'w')
