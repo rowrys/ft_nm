@@ -145,13 +145,15 @@ parse_elf(t_ctx* ctx, t_file* file, char* file_path) {
 void
 parse_all_elf(t_ctx* ctx) {
 	t_file	file;
+	char*	current_binary_file_path;
 
 	for (size_t i = 0; i < ctx->nb_binary; ++i) {
-		map_file(&file, ctx->binary_file_path[i]);
-		parse_elf(ctx, &file, ctx->binary_file_path[i]);
+		current_binary_file_path = ctx->binary_file_path[i];
+		map_file(&file, current_binary_file_path);
+		parse_elf(ctx, &file, current_binary_file_path);
+		display_symbols_info(ctx, current_binary_file_path);
 		if (i != ctx->nb_binary - 1 && ctx->nb_binary != 1)
 			printf("\n");
-		display_symbols_info(ctx);
 		munmap(file.buffer, file.size);
 	}
 }

@@ -77,7 +77,6 @@ set_flags_priority(size_t* options) {
 
 void
 parse_argument(t_ctx* ctx, char** argv) {
-
 	for (size_t i = 1; argv[i]; ++i) {
 		if (argv[i][0] == '-' && argv[i][1])
 			get_options(ctx, argv[i]);
