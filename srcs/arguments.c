@@ -62,8 +62,7 @@ set_binarys_path(t_ctx* ctx, char** argv) {
 	for (size_t i = 1; argv[i]; ++i) {
 		if (argv[i][0] == '-' && argv[i][1])
 			continue ;
-		else
-			ctx->binary_file_path[idx++] = argv[i];
+		ctx->binary_file_path[idx++] = argv[i];
 	}
 }
 

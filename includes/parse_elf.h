@@ -5,17 +5,14 @@
 # include "file.h"
 
 # include <stdbool.h>
-#include <stdint.h>
 # include <string.h>
 # include <elf.h>
 
 typedef struct s_elf_info {
-	uint64_t	shoff;
-	uint16_t	nb_phdr;
-	uint16_t	nb_shdr;
-	uint16_t	size_phdr;
-	uint16_t	size_shdr;
-	uint16_t	shstrndx;
+	void*		sh;				/* addrs of section headers.	*/
+	uint16_t	nb_shdr;		/* nombers of section headers	*/
+	uint16_t	size_shdr;		/* size of section headers		*/
+	uint16_t	shstrndx;		/* index of strtab in sh		*/
 	bool		is_x64;
 
 } t_elf_info;

@@ -4,7 +4,7 @@
 # include "ft_nm.h"
 # include "parse_elf.h"
 
-char	get_symbos_type(t_ctx* ctx, t_elf_info* elf_info, t_file* file, void* sym_hdr);
+char	get_symbos_type(t_ctx* ctx, t_elf_info* elf_info, void* sym_hdr);
 
 static inline char
 convert_gloal_symbol(char c, bool is_global) {
