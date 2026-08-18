@@ -70,7 +70,7 @@ get_symbol_type_from_s_hdr(void* symbol_relation_section, uint32_t s_hdr_type, t
 }
 
 char
-get_symbos_type(t_ctx* ctx, t_elf_info* elf_info, void* sym_hdr) {
+get_symbos_type(t_ctx* ctx, void* sym_hdr) {
 	void*		symbol_relation_section;		/* Elf64_Shdr/Elf32_Shdr */
 	bool		is_maj;
 	uint32_t	s_hdr_type;
@@ -79,14 +79,14 @@ get_symbos_type(t_ctx* ctx, t_elf_info* elf_info, void* sym_hdr) {
 	uchar		sym_hdr_info;
 	char		result;
 
-	symhdrcpy_info(&sym_hdr_info, sym_hdr, elf_info->is_x64);
-	symhdrcpy_shndx(&sym_hdr_shndx, sym_hdr, elf_info->is_x64);
+	symhdrcpy_info(&sym_hdr_info, sym_hdr, ctx->elf_info->is_x64);
+	symhdrcpy_shndx(&sym_hdr_shndx, sym_hdr, ctx->elf_info->is_x64);
 	is_maj = (ELF32_ST_BIND(sym_hdr_info) & STB_GLOBAL);
-	result = get_specifique_symbol_type(ctx, elf_info, sym_hdr_shndx, sym_hdr_info);
+	result = get_specifique_symbol_type(ctx, ctx->elf_info, sym_hdr_shndx, sym_hdr_info);
 	if (result)
 		return (result);
-	symbol_relation_section = get_s_hdr_by_index(elf_info->sh, sym_hdr_shndx, elf_info->is_x64);
-	shdrcpy_type(&s_hdr_type, symbol_relation_section, elf_info->is_x64);
-	shdrcpy_name(&s_hdr_name, symbol_relation_section,  elf_info->is_x64);
-	return (get_symbol_type_from_s_hdr(symbol_relation_section, s_hdr_type, elf_info, is_maj));
+	symbol_relation_section = get_s_hdr_by_index(ctx->elf_info->sh, sym_hdr_shndx, ctx->elf_info->is_x64);
+	shdrcpy_type(&s_hdr_type, symbol_relation_section, ctx->elf_info->is_x64);
+	shdrcpy_name(&s_hdr_name, symbol_relation_section,  ctx->elf_info->is_x64);
+	return (get_symbol_type_from_s_hdr(symbol_relation_section, s_hdr_type, ctx->elf_info, is_maj));
 }

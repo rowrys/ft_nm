@@ -94,9 +94,10 @@ sort_symbols_value(t_ctx* ctx) {
 }
 
 void
-display_symbols_info(t_ctx* ctx, char* current_binary_file_path) {
+display_symbols_info(t_ctx* ctx) {
 	if (!ctx->symbols_info_len) {
-		printf("nm: %s: no symbols\n", current_binary_file_path);
+		if (!ctx->exit_code)
+			printf("nm: %s: no symbols\n", ctx->current_binary_file_path);
 		return ;
 	}
 	if (!get_option_stat(ctx->options, OPT_P)) {
