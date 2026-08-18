@@ -12,7 +12,7 @@
 
 # define DEFAULT_FILE_PATH "a.out"
 # define DEFAULT_ERROR_MSG "nm: FATAL\n"
-# define MSG_ERROR_INVALID_OPTION "Usage: nm [option(s)] [file(s)]\n List symbols in [file(s)] (a.out by default).\n The options are:\n  -a, --debug-syms       Display debugger-only symbols\n  -g, --extern-only      Display only external symbols\n    --ifunc-chars=CHARS  Characters to use when displaying ifunc symbols\n  -p, --no-sort          Do not sort the symbols\n  -r, --reverse-sort     Reverse the sense of the sort\n      --plugin NAME      Load the specified plugin\n  -u, --undefined-only   Display only undefined symbols\n"
+# define MSG_ERROR_INVALID_OPTION "Usage: nm [option(s)] [file(s)]\n List symbols in [file(s)] (a.out by default).\n The options are:\n  -a, --debug-syms       Display debugger-only symbols\n  -g, --extern-only      Display only external symbols\n  -p, --no-sort          Do not sort the symbols\n  -r, --reverse-sort     Reverse the sense of the sort\n  -u, --undefined-only   Display only undefined symbols\n"
 # define MSG_ERROR_OUT_OF_RANGE "nm: %s: file too short\n"
 
 typedef unsigned char		uchar;

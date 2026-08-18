@@ -8,6 +8,28 @@
 #include <stdlib.h>
 
 static void
+get_large_options(t_ctx* ctx, char* opt) {
+	++opt;
+	if (opt[0] == '-' && !opt[1])
+		return ;
+	if (!strcmp(opt, "-debug-syms"))
+		set_option_stat(&(ctx->options), OPT_A, 1);
+	else if (!strcmp(opt, "-extern-only"))
+		set_option_stat(&(ctx->options), OPT_G, 1);
+	else if (!strcmp(opt, "-no-sort"))
+		set_option_stat(&(ctx->options), OPT_P, 1);
+	else if (!strcmp(opt, "-reverse-sort"))
+		set_option_stat(&(ctx->options), OPT_R, 1);
+	else if (!strcmp(opt, "-undefined-only"))
+		set_option_stat(&(ctx->options), OPT_R, 1);
+	else {
+		dprintf(STDERR_FILENO, "nm: unrecognized option '%s'\n", opt);
+		dprintf(STDERR_FILENO, MSG_ERROR_INVALID_OPTION);
+		exit(1);
+	};
+}
+
+static void
 get_options(t_ctx* ctx, char* opt) {
 	for (size_t i = 1; opt[i]; ++i) {
 		switch (opt[i]) {
@@ -27,9 +49,8 @@ get_options(t_ctx* ctx, char* opt) {
 				set_option_stat(&(ctx->options), OPT_U, 1);
 				continue ;
 			case '-':
-				dprintf(STDERR_FILENO, "nm: unrecognized option '%s'\n", opt);
-				dprintf(STDERR_FILENO, MSG_ERROR_INVALID_OPTION);
-				exit(1);
+				get_large_options(ctx, opt);
+				return ;
 			default:
 				dprintf(STDERR_FILENO, "nm: option requires an argument -- '%c'\n", opt[i]);
 				dprintf(STDERR_FILENO, MSG_ERROR_INVALID_OPTION);
