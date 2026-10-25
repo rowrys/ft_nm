@@ -16,7 +16,28 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-static void
+
+static inline char*
+ELF_NAMED(get_sym_name)(t_ctx* ctx, uint64_t offset, uint32_t sym_hdr_name, ELF_SYM* sym_hdr) {
+	ELF_SHDR*	symbol_relation_section;
+	ELF_SHDR*	s_strtab;
+	char*		result;
+
+	s_strtab = get_s_hdr_by_index(ctx->elf_info->sh, ctx->elf_info->shstrndx, ctx->elf_info->is_x64);
+	if (check_addr(ctx->file, s_strtab))
+		out_of_range(ctx);
+	if (ELF_ST_TYPE(sym_hdr->st_info) == STT_SECTION) {
+		symbol_relation_section = get_s_hdr_by_index(ctx->elf_info->sh, sym_hdr->st_shndx, ctx->elf_info->is_x64);
+		if (check_addr(ctx->file, symbol_relation_section))
+			out_of_range(ctx);
+		result = ptr_add(ctx->file->buffer, s_strtab->sh_offset + symbol_relation_section->sh_name);
+	}
+	else
+		result = ptr_add(ctx->file->buffer, offset + sym_hdr_name);
+	return (check_addr(ctx->file, result) ? NULL : result);
+}
+
+static inline void
 ELF_NAMED(parse_sym_hdr)(t_ctx* ctx, ELF_SYM* sym_hdr, ELF_SHDR* s_symtab) {
 	bool const		is_x64 = ctx->elf_info->is_x64;
 	size_t const	nb_entry = get_nb_entry(s_symtab, ctx->elf_info->is_x64);
@@ -26,7 +47,7 @@ ELF_NAMED(parse_sym_hdr)(t_ctx* ctx, ELF_SYM* sym_hdr, ELF_SHDR* s_symtab) {
 	ctx->symbols_info_len = 0;
 	for (size_t i = 0; i < nb_entry; ++i) {
 		if (i && (((char *)ptr_add(ctx->file->buffer, offset + sym_hdr->st_name))[0] || get_option_stat(ctx->options, OPT_A))) {
-			add_symbol_info(ctx, sym_hdr->st_value, get_symbos_type(ctx, sym_hdr), get_sym_name(ctx, offset, sym_hdr->st_name, sym_hdr));
+			add_symbol_info(ctx, sym_hdr->st_value, get_symbos_type(ctx, sym_hdr), ELF_NAMED(get_sym_name)(ctx, offset, sym_hdr->st_name, sym_hdr));
 		}
 		sym_hdr = ptr_add(sym_hdr, s_symtab->sh_entsize);
 		if (!sym_hdr)
@@ -35,7 +56,7 @@ ELF_NAMED(parse_sym_hdr)(t_ctx* ctx, ELF_SYM* sym_hdr, ELF_SHDR* s_symtab) {
 }
 
 
-static void
+static inline void
 ELF_NAMED(parse_section_hdr)(t_ctx* ctx) {
 	ELF_SHDR*	s_hdr;
 

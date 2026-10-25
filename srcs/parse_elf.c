@@ -71,35 +71,36 @@ get_nb_entry(void* s_hdr, bool is_x64) {
 	return (s_hdr_size / s_hdr_entsize);
 }
 
-static char*
-get_sym_name(t_ctx* ctx, uint64_t offset, uint32_t sym_hdr_name, void* sym_hdr) {
-	void*		symbol_relation_section;		/* Elf64_Shdr/Elf32_Shdr */
-	void*		s_strtab;						/* Elf64_Shdr/Elf32_Shdr */
-	char*		result;
-	uint16_t	st_shndx;
-	uint32_t	s_hdr_name;
-	uint64_t	strtab_offset;
-	uchar		sym_hdr_info;
-
-	s_strtab = get_s_hdr_by_index(ctx->elf_info->sh, ctx->elf_info->shstrndx, ctx->elf_info->is_x64);
-	if (check_addr(ctx->file, s_strtab))
-		out_of_range(ctx);
-	symhdrcpy_info(&sym_hdr_info, sym_hdr, ctx->elf_info->is_x64);
-	if (ELF_ST_TYPE(sym_hdr_info) == STT_SECTION) {
-		symhdrcpy_shndx(&st_shndx, sym_hdr, ctx->elf_info->is_x64);
-		shdrcpy_offset(&strtab_offset, s_strtab, ctx->elf_info->is_x64);
-		symbol_relation_section = get_s_hdr_by_index(ctx->elf_info->sh, st_shndx, ctx->elf_info->is_x64);
-		if (check_addr(ctx->file, symbol_relation_section))
-			out_of_range(ctx);
-		shdrcpy_name(&s_hdr_name, symbol_relation_section, ctx->elf_info->is_x64);
-		result = ptr_add(ctx->file->buffer, strtab_offset + s_hdr_name);
-	}
-	else
-		result = ptr_add(ctx->file->buffer, offset + sym_hdr_name);
-	return (check_addr(ctx->file, result) ? NULL : result);
-}
-
 #include "template/parse_elf_impls.h"
+
+
+// static char*
+// get_sym_name(t_ctx* ctx, uint64_t offset, uint32_t sym_hdr_name, void* sym_hdr) {
+// 	void*		symbol_relation_section;		/* Elf64_Shdr/Elf32_Shdr */
+// 	void*		s_strtab;						/* Elf64_Shdr/Elf32_Shdr */
+// 	char*		result;
+// 	uint16_t	st_shndx;
+// 	uint32_t	s_hdr_name;
+// 	uint64_t	strtab_offset;
+// 	uchar		sym_hdr_info;
+
+// 	s_strtab = get_s_hdr_by_index(ctx->elf_info->sh, ctx->elf_info->shstrndx, ctx->elf_info->is_x64);
+// 	if (check_addr(ctx->file, s_strtab))
+// 		out_of_range(ctx);
+// 	symhdrcpy_info(&sym_hdr_info, sym_hdr, ctx->elf_info->is_x64);
+// 	if (ELF_ST_TYPE(sym_hdr_info) == STT_SECTION) {
+// 		symhdrcpy_shndx(&st_shndx, sym_hdr, ctx->elf_info->is_x64);
+// 		shdrcpy_offset(&strtab_offset, s_strtab, ctx->elf_info->is_x64);
+// 		symbol_relation_section = get_s_hdr_by_index(ctx->elf_info->sh, st_shndx, ctx->elf_info->is_x64);
+// 		if (check_addr(ctx->file, symbol_relation_section))
+// 			out_of_range(ctx);
+// 		shdrcpy_name(&s_hdr_name, symbol_relation_section, ctx->elf_info->is_x64);
+// 		result = ptr_add(ctx->file->buffer, strtab_offset + s_hdr_name);
+// 	}
+// 	else
+// 		result = ptr_add(ctx->file->buffer, offset + sym_hdr_name);
+// 	return (check_addr(ctx->file, result) ? NULL : result);
+// }
 
 // static void
 // parse_sym_hdr(t_ctx* ctx, void* sym_hdr, void* s_symtab) {
