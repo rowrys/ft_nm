@@ -1,24 +1,10 @@
  
 #include "symbols_type.h"
-#include "file.h"
 #include "ft_nm.h"
 #include "utils.h"
-#include "parse_elf.h"
 #include <stdint.h>
 
-static char
-get_type_from_progbits(t_elf_info* elf_info, void* symbol_relation_section) {
-	uint64_t	s_hdr_flags;
 
-	shdrcpy_flags(&s_hdr_flags, symbol_relation_section, elf_info->is_x64);
-	if (s_hdr_flags & SHF_ALLOC && s_hdr_flags & SHF_WRITE)
-		return ('d');
-	else if (s_hdr_flags & SHF_ALLOC && s_hdr_flags & SHF_EXECINSTR)
-		return ('t');
-	else if (s_hdr_flags & SHF_ALLOC)
-		return ('r');
-	return ('?');
-}
 
 static char
 get_weak_symbols(uint16_t sym_hdr_shndx, uchar sym_hdr_info) {
@@ -43,13 +29,13 @@ get_gnu_symbols(uint16_t sym_hdr_shndx) {
 }
 
 static char
-get_specifique_symbol_type(t_ctx* ctx, t_elf_info* elf_info, uint16_t sym_hdr_shndx, uchar sym_hdr_info) {
+get_specifique_symbol_type(t_ctx* ctx, unsigned short shnum, uint16_t sym_hdr_shndx, uchar sym_hdr_info) {
 	if (sym_hdr_info == STT_FILE) {
 		if (get_option_stat(ctx->options, OPT_A))
 			return ('a');
 		return (SYMBOL_TYPE_NON_PRINTABLE);
 	}
-	if (sym_hdr_shndx > elf_info->nb_shdr)
+	if (sym_hdr_shndx > shnum)
 		return (get_gnu_symbols(sym_hdr_shndx));
 	if (ELF_ST_BIND(sym_hdr_info) == STB_WEAK)
 		return (get_weak_symbols(sym_hdr_shndx, sym_hdr_info));
@@ -58,35 +44,6 @@ get_specifique_symbol_type(t_ctx* ctx, t_elf_info* elf_info, uint16_t sym_hdr_sh
 	return (0);
 }
 
-static char
-get_symbol_type_from_s_hdr(void* symbol_relation_section, uint32_t s_hdr_type, t_elf_info* elf_info, bool is_maj) {
-	switch (s_hdr_type) {
-		case SHT_NOBITS:
-			return (convert_gloal_symbol('b', is_maj));
-		case SHT_PROGBITS: case SHT_NOTE: case SHT_DYNAMIC: case SHT_INIT_ARRAY: case SHT_FINI_ARRAY:
-			return (convert_gloal_symbol(get_type_from_progbits(elf_info, symbol_relation_section), is_maj));
-	}
-	return (convert_gloal_symbol('u', is_maj));
-}
+#define ELF_SYMBOLS
+#include "template/parse_elf_impls.h"
 
-char
-get_symbos_type(t_ctx* ctx, void* sym_hdr) {
-	void*		symbol_relation_section;		/* Elf64_Shdr/Elf32_Shdr */
-	bool		is_maj;
-	uint32_t	s_hdr_type;
-	uint32_t	s_hdr_name;
-	uint16_t	sym_hdr_shndx;
-	uchar		sym_hdr_info;
-	char		result;
-
-	symhdrcpy_info(&sym_hdr_info, sym_hdr, ctx->elf_info->is_x64);
-	symhdrcpy_shndx(&sym_hdr_shndx, sym_hdr, ctx->elf_info->is_x64);
-	is_maj = (ELF32_ST_BIND(sym_hdr_info) & STB_GLOBAL);
-	result = get_specifique_symbol_type(ctx, ctx->elf_info, sym_hdr_shndx, sym_hdr_info);
-	if (result)
-		return (result);
-	symbol_relation_section = get_s_hdr_by_index(ctx->elf_info->sh, sym_hdr_shndx, ctx->elf_info->is_x64);
-	shdrcpy_type(&s_hdr_type, symbol_relation_section, ctx->elf_info->is_x64);
-	shdrcpy_name(&s_hdr_name, symbol_relation_section,  ctx->elf_info->is_x64);
-	return (get_symbol_type_from_s_hdr(symbol_relation_section, s_hdr_type, ctx->elf_info, is_maj));
-}

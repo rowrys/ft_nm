@@ -18,9 +18,53 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "symbols_type.h"
 
 #define ELF_INFO ((ELF_EHDR*)(ctx->file->buffer))
+
+#ifdef ELF_SYMBOLS
+
+static char
+ELF_NAMED(get_type_from_progbits)(ELF_SHDR* symbol_relation_section) {
+	uint64_t const	s_hdr_flags = symbol_relation_section->sh_flags;
+
+	if (s_hdr_flags & SHF_ALLOC && s_hdr_flags & SHF_WRITE)
+		return ('d');
+	else if (s_hdr_flags & SHF_ALLOC && s_hdr_flags & SHF_EXECINSTR)
+		return ('t');
+	else if (s_hdr_flags & SHF_ALLOC)
+		return ('r');
+	return ('?');
+}
+
+static char
+ELF_NAMED(get_symbol_type_from_s_hdr)(ELF_SHDR* symbol_relation_section, uint32_t s_hdr_type, bool is_maj) {
+	switch (s_hdr_type) {
+		case SHT_NOBITS:
+			return (convert_gloal_symbol('b', is_maj));
+		case SHT_PROGBITS: case SHT_NOTE: case SHT_DYNAMIC: case SHT_INIT_ARRAY: case SHT_FINI_ARRAY:
+			return (convert_gloal_symbol(ELF_NAMED(get_type_from_progbits)(symbol_relation_section), is_maj));
+	}
+	return (convert_gloal_symbol('u', is_maj));
+}
+
+char
+ELF_NAMED(get_symbos_type)(t_ctx* ctx, ELF_SYM* sym_hdr) {
+	ELF_SHDR*	symbol_relation_section;
+	bool		is_maj;
+	char		result;
+
+	is_maj = (ELF32_ST_BIND(sym_hdr->st_info) & STB_GLOBAL);
+	result = get_specifique_symbol_type(ctx, ELF_INFO->e_shnum, sym_hdr->st_shndx, sym_hdr->st_info);
+	if (result)
+		return (result);
+	symbol_relation_section = (ELF_SHDR*)ptr_add(ctx->file->buffer, ELF_INFO->e_shoff) + sym_hdr->st_shndx;
+	return (ELF_NAMED(get_symbol_type_from_s_hdr)(symbol_relation_section, symbol_relation_section->sh_type, is_maj));
+}
+
+#endif
+#ifdef ELF_PARSE
+
+char	ELF_NAMED(get_symbos_type)(t_ctx* ctx, ELF_SYM* sym_hdr);
 
 static inline uint64_t
 ELF_NAMED(get_nb_entry)(ELF_SHDR* s_hdr) {
@@ -56,7 +100,7 @@ ELF_NAMED(parse_sym_hdr)(t_ctx* ctx, ELF_SYM* sym_hdr, ELF_SHDR* s_symtab) {
 	ctx->symbols_info_len = 0;
 	for (size_t i = 0; i < nb_entry; ++i) {
 		if (i && (((char *)ptr_add(ctx->file->buffer, offset + sym_hdr->st_name))[0] || get_option_stat(ctx->options, OPT_A))) {
-			add_symbol_info(ctx, sym_hdr->st_value, get_symbos_type(ctx, sym_hdr), ELF_NAMED(get_sym_name)(ctx, offset, sym_hdr->st_name, sym_hdr));
+			add_symbol_info(ctx, sym_hdr->st_value, ELF_NAMED(get_symbos_type)(ctx, sym_hdr), ELF_NAMED(get_sym_name)(ctx, offset, sym_hdr->st_name, sym_hdr));
 		}
 		sym_hdr = ptr_add(sym_hdr, s_symtab->sh_entsize);
 		if (!sym_hdr)
@@ -69,6 +113,8 @@ static inline void
 ELF_NAMED(parse_section_hdr)(t_ctx* ctx) {
 	ELF_SHDR*	s_hdr;
 
+	if (check_addr(ctx->file, ptr_add(ctx->file->buffer, ELF_INFO->e_shoff)))
+		out_of_range(ctx);
 	s_hdr = ptr_add(ctx->file->buffer, ELF_INFO->e_shoff);
 	for (size_t i = 0; i < ELF_INFO->e_shnum; ++i) {
 		if (s_hdr->sh_type == SHT_SYMTAB) {
@@ -80,6 +126,8 @@ ELF_NAMED(parse_section_hdr)(t_ctx* ctx) {
 			out_of_range(ctx);
 	}
 }
+
+#endif
 
 #undef ELF_GLUE_I
 #undef ELF_GLUE

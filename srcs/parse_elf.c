@@ -50,16 +50,13 @@ check_elf_hdr(t_ctx* ctx) {
 	return (0);
 }
 
-static void
+static bool
 get_elf_info(t_elf_info* elf_info, t_file* file) {
 	elf_info->is_x64 = *((uchar*)ptr_add(file->buffer, EI_CLASS)) == (uchar)ELFCLASS64;
-	memcpy(&elf_info->nb_shdr, ptr_add(file->buffer, OFFSET_EHDR(elf_info->is_x64, e_shnum)), 2);
-	memcpy(&elf_info->size_shdr, ptr_add(file->buffer, OFFSET_EHDR(elf_info->is_x64, e_shentsize)), 2);
-	memcpy(&elf_info->shstrndx, ptr_add(file->buffer, OFFSET_EHDR(elf_info->is_x64, e_shstrndx)), 2);
-	memcpy(&elf_info->sh, ptr_add(file->buffer, OFFSET_EHDR(elf_info->is_x64, e_shoff)), sizeof(uint64_t) >> !elf_info->is_x64);
-	elf_info->sh = ptr_add(file->buffer, (size_t)elf_info->sh);
+	return (elf_info->is_x64);
 }
 
+#define ELF_PARSE
 #include "template/parse_elf_impls.h"
 
 static void
@@ -71,10 +68,7 @@ parse_elf(t_ctx* ctx) {
 		return ;
 	if (ctx->nb_binary != 1)
 		printf("%s:\n", ctx->current_binary_file_path);
-	get_elf_info(&elf_info, ctx->file);
-	if (check_addr(ctx->file, elf_info.sh))
-		out_of_range(ctx);
-	if (elf_info.is_x64)
+	if (get_elf_info(&elf_info, ctx->file))
 		parse_section_hdr_elf64(ctx);
 	else
 		parse_section_hdr_elf32(ctx);
