@@ -16,14 +16,12 @@
 # define MSG_ERROR_OUT_OF_RANGE "nm: %s: file too short\n"
 
 typedef unsigned char		uchar;
-typedef struct s_elf_info	t_elf_info;
 
 typedef struct s_ctx {
 	size_t			nb_binary;					/* numbers of binary to analyse.	*/
 	char**			binary_file_path;			/* file path of the binary.			*/
 	char*			current_binary_file_path;	/* currrent file path of the binary.*/
 	size_t			options;					/* store the differents option		*/
-	t_elf_info*		elf_info;					/* store Ehdr info					*/
 	t_file*			file;						/* store buffer of file and it size	*/
 	t_symbol_info*	symbols_info;				/* tab of symbol_info				*/
 	size_t			symbols_info_len;			/* lenght of symbols_info			*/

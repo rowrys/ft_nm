@@ -4,8 +4,6 @@
 #include "utils.h"
 #include <stdint.h>
 
-
-
 static char
 get_weak_symbols(uint16_t sym_hdr_shndx, uchar sym_hdr_info) {
 	switch (ELF_ST_TYPE(sym_hdr_info)) {

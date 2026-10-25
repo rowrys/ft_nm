@@ -21,6 +21,24 @@
 
 #define ELF_INFO ((ELF_EHDR*)(ctx->file->buffer))
 
+#ifndef ELF_SYMBOLS_INFO
+
+#include <stdlib.h>
+#include <sys/mman.h>
+
+static inline void
+ELF_NAMED(init_symbols_info)(t_ctx* ctx, t_file* file, ELF_SHDR* s_hdr) {
+	ctx->symbols_info_len = s_hdr->sh_size / s_hdr->sh_entsize;
+	ctx->symbols_info = malloc(sizeof(t_symbol_info) * ctx->symbols_info_len);
+	if (!ctx->symbols_info) {
+		munmap(file->buffer, file->size);
+		free(ctx->binary_file_path);
+		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG);
+		exit(1);
+	}
+}
+
+#endif
 #ifdef ELF_SYMBOLS
 
 static char
@@ -65,6 +83,7 @@ ELF_NAMED(get_symbos_type)(t_ctx* ctx, ELF_SYM* sym_hdr) {
 #ifdef ELF_PARSE
 
 char	ELF_NAMED(get_symbos_type)(t_ctx* ctx, ELF_SYM* sym_hdr);
+void	ELF_NAMED(init_symbols_info)(t_ctx* ctx, t_file* file, ELF_SHDR* s_hdr);
 
 static inline uint64_t
 ELF_NAMED(get_nb_entry)(ELF_SHDR* s_hdr) {
@@ -118,7 +137,7 @@ ELF_NAMED(parse_section_hdr)(t_ctx* ctx) {
 	s_hdr = ptr_add(ctx->file->buffer, ELF_INFO->e_shoff);
 	for (size_t i = 0; i < ELF_INFO->e_shnum; ++i) {
 		if (s_hdr->sh_type == SHT_SYMTAB) {
-			init_symbols_info(ctx, ctx->file, s_hdr, ctx->elf_info->is_x64);
+			ELF_NAMED(init_symbols_info)(ctx, ctx->file, s_hdr);
 			ELF_NAMED(parse_sym_hdr)(ctx, ptr_add(ctx->file->buffer, s_hdr->sh_offset), s_hdr);
 		}
 		s_hdr = next_hdr(s_hdr, ELF_INFO->e_shentsize, ctx->file);
