@@ -11,12 +11,14 @@
 # define ELF_POSTFIX _elf64
 # define ELF_SHDR Elf64_Shdr
 # define ELF_SYM Elf64_Sym
+# define ELF_EHDR Elf64_Ehdr
 # include "parse_elf_gen.h"
 
 
 # define ELF_POSTFIX _elf32
 # define ELF_SHDR Elf32_Shdr
 # define ELF_SYM Elf32_Sym
+# define ELF_EHDR Elf32_Ehdr
 # include "parse_elf_gen.h"
 
 #endif

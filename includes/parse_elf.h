@@ -14,7 +14,6 @@ typedef struct s_elf_info {
 	uint16_t	size_shdr;		/* size of section headers		*/
 	uint16_t	shstrndx;		/* index of strtab in sh		*/
 	bool		is_x64;
-
 } t_elf_info;
 
 static inline bool
