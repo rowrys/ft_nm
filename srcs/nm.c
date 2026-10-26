@@ -1,9 +1,7 @@
-
 #include "ft_nm.h"
 #include "arguments.h"
 #include "parse_elf.h"
 
-#include <stdint.h>
 #include <stdlib.h>
 
 void

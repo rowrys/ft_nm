@@ -43,7 +43,6 @@ ELF_NAMED(parse_sym_hdr)(t_ctx* ctx, ELF_SYM* sym_hdr, ELF_SHDR* s_symtab) {
 	}
 }
 
-
 static inline void
 ELF_NAMED(parse_section_hdr)(t_ctx* ctx) {
 	ELF_SHDR*	s_hdr;

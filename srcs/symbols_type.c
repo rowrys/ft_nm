@@ -1,8 +1,5 @@
- 
-#include "symbols_type.h"
-#include "ft_nm.h"
+ #include "symbols_type.h"
 #include "utils.h"
-#include <stdint.h>
 
 static char
 get_weak_symbols(uint16_t sym_hdr_shndx, uchar sym_hdr_info) {

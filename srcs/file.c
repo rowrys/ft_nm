@@ -1,13 +1,8 @@
-
 # include "ft_nm.h"
-# include "file.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-
+#include <stdlib.h>
 #include <sys/mman.h>
 
 void

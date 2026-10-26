@@ -1,19 +1,7 @@
-
-#include "file.h"
-#include "ft_nm.h"
 #include "parse_elf.h"
-#include "symbols_info.h"
 #include "utils.h"
 
-#include <elf.h>
-
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 #include <sys/mman.h>
-#include <unistd.h>
 #include <stdlib.h>
 
 static inline void
