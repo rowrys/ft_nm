@@ -56,11 +56,6 @@ ptr_sub(void* ptr, size_t n) {
 	return ((uchar*)ptr - n);
 }
 
-static inline void*
-get_s_hdr_by_index(void* section_hdr_tab, uint32_t idx, bool is_x64) {
-	return (is_x64 == 1 ? ptr_add(section_hdr_tab, sizeof(Elf64_Shdr) * idx) : ptr_add(section_hdr_tab, sizeof(Elf32_Shdr) * idx));
-}
-
 void	destoy_ctx(t_ctx* ctx, uint8_t exit_code);
 
 #endif
