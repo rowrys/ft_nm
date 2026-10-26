@@ -1,33 +1,10 @@
-
 #include "ft_nm.h"
-#include "symbols_info.h"
-#include "utils.h"
 
 #include <ctype.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/mman.h>
 
-void
-init_symbols_info(t_ctx* ctx, t_file* file, void* s_hdr, bool is_x64) {
-	uint64_t	s_hdr_size;
-	uint64_t	s_hdr_entsize;
-
-	shdrcpy_size(&s_hdr_size, s_hdr, is_x64);
-	shdrcpy_entsize(&s_hdr_entsize, s_hdr, is_x64);
-	ctx->symbols_info_len = s_hdr_size / s_hdr_entsize;
-	ctx->symbols_info = malloc(sizeof(t_symbol_info) * ctx->symbols_info_len);
-	if (!ctx->symbols_info) {
-		munmap(file->buffer, file->size);
-		free(ctx->binary_file_path);
-		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG);
-		exit(1);
-	}
-}
+#define ELF_SYMBOLS_INFO
+#include "template/parse_elf_impls.h"
 
 static bool
 is_external_symbol(char symbol_type) {

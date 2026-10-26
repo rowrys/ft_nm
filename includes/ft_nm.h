@@ -16,14 +16,12 @@
 # define MSG_ERROR_OUT_OF_RANGE "nm: %s: file too short\n"
 
 typedef unsigned char		uchar;
-typedef struct s_elf_info	t_elf_info;
 
 typedef struct s_ctx {
 	size_t			nb_binary;					/* numbers of binary to analyse.	*/
 	char**			binary_file_path;			/* file path of the binary.			*/
 	char*			current_binary_file_path;	/* currrent file path of the binary.*/
 	size_t			options;					/* store the differents option		*/
-	t_elf_info*		elf_info;					/* store Ehdr info					*/
 	t_file*			file;						/* store buffer of file and it size	*/
 	t_symbol_info*	symbols_info;				/* tab of symbol_info				*/
 	size_t			symbols_info_len;			/* lenght of symbols_info			*/
@@ -56,11 +54,6 @@ ptr_add(void* ptr, size_t n) {
 static inline void*
 ptr_sub(void* ptr, size_t n) {
 	return ((uchar*)ptr - n);
-}
-
-static inline void*
-get_s_hdr_by_index(void* section_hdr_tab, uint32_t idx, bool is_x64) {
-	return (is_x64 == 1 ? ptr_add(section_hdr_tab, sizeof(Elf64_Shdr) * idx) : ptr_add(section_hdr_tab, sizeof(Elf32_Shdr) * idx));
 }
 
 void	destoy_ctx(t_ctx* ctx, uint8_t exit_code);
