@@ -1,5 +1,16 @@
- #include "symbols_type.h"
+#include "symbols_type.h"
 #include "utils.h"
+
+static char
+get_type_from_progbits(uint64_t const s_hdr_flags) {
+	if (s_hdr_flags & SHF_ALLOC && s_hdr_flags & SHF_WRITE)
+		return ('d');
+	else if (s_hdr_flags & SHF_ALLOC && s_hdr_flags & SHF_EXECINSTR)
+		return ('t');
+	else if (s_hdr_flags & SHF_ALLOC)
+		return ('r');
+	return ('?');
+}
 
 static char
 get_weak_symbols(uint16_t sym_hdr_shndx, uchar sym_hdr_info) {
@@ -41,4 +52,3 @@ get_specifique_symbol_type(t_ctx* ctx, unsigned short shnum, uint16_t sym_hdr_sh
 
 #define ELF_SYMBOLS
 #include "template/parse_elf_impls.h"
-

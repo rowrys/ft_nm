@@ -1,11 +1,6 @@
 char	ELF_NAMED(get_symbos_type)(t_ctx* ctx, ELF_SYM* sym_hdr);
 void	ELF_NAMED(init_symbols_info)(t_ctx* ctx, t_file* file, ELF_SHDR* s_hdr);
 
-static inline uint64_t
-ELF_NAMED(get_nb_entry)(ELF_SHDR* s_hdr) {
-	return (s_hdr->sh_size / s_hdr->sh_entsize);
-}
-
 static inline char*
 ELF_NAMED(get_sym_name)(t_ctx* ctx, uint64_t offset, uint32_t sym_hdr_name, ELF_SYM* sym_hdr) {
 	ELF_SHDR*	symbol_relation_section;
@@ -28,7 +23,7 @@ ELF_NAMED(get_sym_name)(t_ctx* ctx, uint64_t offset, uint32_t sym_hdr_name, ELF_
 
 static inline void
 ELF_NAMED(parse_sym_hdr)(t_ctx* ctx, ELF_SYM* sym_hdr, ELF_SHDR* s_symtab) {
-	size_t const	nb_entry = ELF_NAMED(get_nb_entry)(s_symtab);
+	size_t const	nb_entry = s_symtab->sh_size / s_symtab->sh_entsize;
 	uint64_t		offset;
 	char*			sym_name;
 

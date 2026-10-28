@@ -3,12 +3,12 @@
 
 # include "symbols_info.h"
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <elf.h>
-#include <unistd.h>
+# include <stddef.h>
+# include <stdint.h>
+# include <stdbool.h>
+# include <stdio.h>
+# include <elf.h>
+# include <unistd.h>
 
 # define DEFAULT_FILE_PATH "a.out"
 
