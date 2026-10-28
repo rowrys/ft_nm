@@ -47,7 +47,7 @@ next_hdr(void* s_hdr, uint16_t size_shdr, t_file* file) {
 	void*	final_addr;
 
 	final_addr = ptr_add(s_hdr, size_shdr);
-	if (check_addr(file, ptr_add(s_hdr, size_shdr)))
+	if (check_addr(file, final_addr))
 		return (NULL);
 	return (final_addr);
 }

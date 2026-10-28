@@ -30,14 +30,19 @@ static inline void
 ELF_NAMED(parse_sym_hdr)(t_ctx* ctx, ELF_SYM* sym_hdr, ELF_SHDR* s_symtab) {
 	size_t const	nb_entry = ELF_NAMED(get_nb_entry)(s_symtab);
 	uint64_t		offset;
+	char*			sym_name;
 
+	if (check_addr(ctx->file, sym_hdr))
+		out_of_range(ctx);
 	offset = ((ELF_SHDR *)((ELF_SHDR*)ptr_add(ctx->file->buffer, ELF_INFO->e_shoff) + s_symtab->sh_link))->sh_offset;
 	ctx->symbols_info_len = 0;
 	for (size_t i = 0; i < nb_entry; ++i) {
-		if (i && (((char *)ptr_add(ctx->file->buffer, offset + sym_hdr->st_name))[0] || get_option_stat(ctx->options, OPT_A))) {
+		sym_name = ptr_add(ctx->file->buffer, offset + sym_hdr->st_name);
+		if (check_addr(ctx->file, sym_name))
+			out_of_range(ctx);
+		if (i && (sym_name[0] || get_option_stat(ctx->options, OPT_A)))
 			add_symbol_info(ctx, sym_hdr->st_value, ELF_NAMED(get_symbos_type)(ctx, sym_hdr), ELF_NAMED(get_sym_name)(ctx, offset, sym_hdr->st_name, sym_hdr));
-		}
-		sym_hdr = ptr_add(sym_hdr, s_symtab->sh_entsize);
+		sym_hdr = next_hdr(sym_hdr, s_symtab->sh_entsize, ctx->file);
 		if (!sym_hdr)
 			out_of_range(ctx);
 	}
