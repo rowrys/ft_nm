@@ -8,7 +8,7 @@ ELF_NAMED(init_symbols_info)(t_ctx* ctx, t_file* file, ELF_SHDR* s_hdr) {
 	if (!ctx->symbols_info) {
 		munmap(file->buffer, file->size);
 		free(ctx->binary_file_path);
-		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG);
+		dprintf(STDERR_FILENO, ERROR_MSG_MEM_ALLOC);
 		exit(1);
 	}
 }

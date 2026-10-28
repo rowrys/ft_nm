@@ -25,13 +25,13 @@ check_elf_hdr(t_ctx* ctx) {
 	}
 	is_x64 = *((uchar*)ptr_add(ctx->file->buffer, EI_CLASS)) == (uchar)ELFCLASS64;
 	if (memcmp(ptr_add(ctx->file->buffer, EI_CLASS), &elfclass32, sizeof(uchar)) && !is_x64) {
-		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG); /* Invalid class */
+		dprintf(STDERR_FILENO, ERROR_MSG_CLASS); /* Invalid class */
 		ctx->exit_code = 1;
 		return (1);
 	}
 	if (!memcmp(ptr_add(ctx->file->buffer, OFFSET_EHDR(is_x64, e_type)), &et_rel, 2)
 			&& !memcmp(ptr_add(ctx->file->buffer, OFFSET_EHDR(is_x64, e_type)), &et_dyn, 2)) {
-		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG); /* Invalid file format not (.so .o x86(_64)) */
+		dprintf(STDERR_FILENO, ERROR_MSG_FORMAT); /* Invalid file format not (.so .o x86(_64)) */
 		ctx->exit_code = 1;
 		return (1);
 	}

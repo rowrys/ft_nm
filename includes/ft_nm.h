@@ -11,7 +11,12 @@
 #include <unistd.h>
 
 # define DEFAULT_FILE_PATH "a.out"
+
 # define DEFAULT_ERROR_MSG "nm: FATAL\n"
+# define ERROR_MSG_MEM_ALLOC "nm: failed to allow memory, your pc is OK?!\n"
+# define ERROR_MSG_FORMAT "nm: only handle x86_32 and x86_64 binaries, object files, and shared libraries (.so)\n"
+# define ERROR_MSG_CLASS "nm: invalid class\n"
+
 # define MSG_ERROR_INVALID_OPTION "Usage: nm [option(s)] [file(s)]\n List symbols in [file(s)] (a.out by default).\n The options are:\n  -a, --debug-syms       Display debugger-only symbols\n  -g, --extern-only      Display only external symbols\n  -p, --no-sort          Do not sort the symbols\n  -r, --reverse-sort     Reverse the sense of the sort\n  -u, --undefined-only   Display only undefined symbols\n"
 # define MSG_ERROR_OUT_OF_RANGE "nm: %s: file too short\n"
 

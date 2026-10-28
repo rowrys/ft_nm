@@ -59,7 +59,7 @@ static void
 set_default_binary_path(t_ctx* ctx) {
 	ctx->binary_file_path = malloc(sizeof(char*));
 	if (!ctx->binary_file_path) {
-		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG);
+		dprintf(STDERR_FILENO, ERROR_MSG_MEM_ALLOC);
 		exit(1);
 	}
 	ctx->binary_file_path[0] = DEFAULT_FILE_PATH;
@@ -72,7 +72,7 @@ set_binarys_path(t_ctx* ctx, char** argv) {
 
 	ctx->binary_file_path = malloc(sizeof(char*) * ctx->nb_binary);
 	if (!ctx->binary_file_path) {
-		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG);
+		dprintf(STDERR_FILENO, ERROR_MSG_MEM_ALLOC);
 		exit(1);
 	}
 	idx = 0;
