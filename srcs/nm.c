@@ -4,13 +4,6 @@
 
 #include <stdlib.h>
 
-void
-destoy_ctx(t_ctx* ctx, uint8_t exit_code)  {
-	free(ctx->binary_file_path);
-	free(ctx->symbols_info);
-	exit(exit_code);
-}
-
 int
 main(int argc, char** argv) {
 	t_ctx	ctx = { 0 };
@@ -18,5 +11,6 @@ main(int argc, char** argv) {
 	(void)argc;
 	parse_argument(&ctx, argv);
 	parse_all_elf(&ctx);
-	destoy_ctx(&ctx, ctx.exit_code);
+	free(ctx.binary_file_path);
+	return (ctx.exit_code);
 }

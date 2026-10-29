@@ -8,7 +8,9 @@ static inline void
 out_of_range(t_ctx* ctx) {
 	dprintf(STDERR_FILENO, MSG_ERROR_OUT_OF_RANGE, ctx->current_binary_file_path);
 	munmap(ctx->file->buffer, ctx->file->size);
-	destoy_ctx(ctx, EXIT_FAILURE);
+	free(ctx->binary_file_path);
+	free(ctx->symbols_info);
+	exit(1);
 }
 
 static bool
@@ -59,12 +61,19 @@ parse_all_elf(t_ctx* ctx) {
 
 	for (size_t i = 0; i < ctx->nb_binary; ++i) {
 		ctx->current_binary_file_path = ctx->binary_file_path[i];
-		map_file(&file, ctx->current_binary_file_path);
+		if (map_file(&file, ctx->current_binary_file_path)) {
+			if (i != ctx->nb_binary - 1 && ctx->nb_binary != 1)
+				printf("\n");
+			continue ;
+		}
 		ctx->file = &file;
 		parse_elf(ctx);
 		display_symbols_info(ctx);
 		if (i != ctx->nb_binary - 1 && ctx->nb_binary != 1)
 			printf("\n");
 		munmap(file.buffer, file.size);
+		free(ctx->symbols_info);
+		ctx->symbols_info = NULL;
+		ctx->symbols_info_len = 0;
 	}
 }

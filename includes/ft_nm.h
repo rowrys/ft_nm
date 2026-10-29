@@ -61,6 +61,4 @@ ptr_sub(void* ptr, size_t n) {
 	return ((uchar*)ptr - n);
 }
 
-void	destoy_ctx(t_ctx* ctx, uint8_t exit_code);
-
 #endif
