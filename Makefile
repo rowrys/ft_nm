@@ -15,7 +15,7 @@ OBJS := $(SOURCES:$(SRCS_DIR)%.c=$(OBJ_DIR)%.o)
 
 DEPS := $(SOURCES:$(SRCS_DIR)%.c=$(OBJ_DIR)%.d)
 
-CFLAGS := -MP -MMD -Wall -Werror -Wextra -std=gnu11 -pedantic-errors -g
+CFLAGS := -MP -MMD -Wall -Werror -Wextra -std=c11 -pedantic-errors -g
 CFLAGS_TEST := -g
 INCLUDE := -I includes/
 

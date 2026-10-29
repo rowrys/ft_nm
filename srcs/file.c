@@ -12,11 +12,11 @@ map_file(t_file* file, char* file_path) {
 
 	fd = open(file_path, O_RDONLY);
 	if (fd == -1) {
-		dprintf(STDERR_FILENO, "nm: '%s': No such file\n", file_path);
+		fprintf(stderr, "nm: '%s': No such file\n", file_path);
 		return (1);
 	}
 	if (fstat(fd, &stat)) {
-		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG);
+		fprintf(stderr, DEFAULT_ERROR_MSG);
 		close(fd);
 		return (1);
 	}
@@ -24,7 +24,7 @@ map_file(t_file* file, char* file_path) {
 	file->buffer = mmap(NULL, stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	close(fd);
 	if (file->buffer == MAP_FAILED) {
-		dprintf(STDERR_FILENO, DEFAULT_ERROR_MSG);
+		fprintf(stderr, DEFAULT_ERROR_MSG);
 		return (1);
 	}
 	return (0);

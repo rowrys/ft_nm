@@ -1,5 +1,6 @@
 #include "ft_nm.h"
 
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -19,8 +20,8 @@ get_large_options(t_ctx* ctx, char* opt) {
 	else if (!strcmp(opt, "-undefined-only"))
 		set_option_stat(&(ctx->options), OPT_R, 1);
 	else {
-		dprintf(STDERR_FILENO, "nm: unrecognized option '%s'\n", opt);
-		dprintf(STDERR_FILENO, MSG_ERROR_INVALID_OPTION);
+		fprintf(stderr, "nm: unrecognized option '%s'\n", opt);
+		fprintf(stderr, MSG_ERROR_INVALID_OPTION);
 		exit(1);
 	};
 }
@@ -48,8 +49,8 @@ get_options(t_ctx* ctx, char* opt) {
 				get_large_options(ctx, opt);
 				return ;
 			default:
-				dprintf(STDERR_FILENO, "nm: option requires an argument -- '%c'\n", opt[i]);
-				dprintf(STDERR_FILENO, MSG_ERROR_INVALID_OPTION);
+				fprintf(stderr, "nm: option requires an argument -- '%c'\n", opt[i]);
+				fprintf(stderr, MSG_ERROR_INVALID_OPTION);
 				exit(1);
 		}
 	}
@@ -59,7 +60,7 @@ static void
 set_default_binary_path(t_ctx* ctx) {
 	ctx->binary_file_path = malloc(sizeof(char*));
 	if (!ctx->binary_file_path) {
-		dprintf(STDERR_FILENO, ERROR_MSG_MEM_ALLOC);
+		fprintf(stderr, ERROR_MSG_MEM_ALLOC);
 		exit(1);
 	}
 	ctx->binary_file_path[0] = DEFAULT_FILE_PATH;
@@ -72,7 +73,7 @@ set_binarys_path(t_ctx* ctx, char** argv) {
 
 	ctx->binary_file_path = malloc(sizeof(char*) * ctx->nb_binary);
 	if (!ctx->binary_file_path) {
-		dprintf(STDERR_FILENO, ERROR_MSG_MEM_ALLOC);
+		fprintf(stderr, ERROR_MSG_MEM_ALLOC);
 		exit(1);
 	}
 	idx = 0;
