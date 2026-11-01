@@ -1,397 +1,121 @@
 # ft_nm
 
-A lightweight reimplementation of [`nm`](https://www.man7.org/linux/man-pages/man1/nm.1.html) written in C.
+A from-scratch reimplementation of the Unix `nm` tool in C. It reads ELF binaries (32-bit and 64-bit, x86 / x86-64) **directly from their raw bytes**, with no parsing library, and lists their symbol tables the way GNU `nm` does.
 
-**ft_nm** parses ELF binaries directly to extract, classify, sort and display their symbols.
-The project focuses on understanding the ELF file format and implementing low-level binary parsing without relying on a dedicated ELF parsing library.
-
-> **42 project — Low-level C / ELF parsing / Systems programming**
+Built as part of the systems programming curriculum at **42 school**.
 
 ---
 
-## 📖 Overview
+## Why this project is interesting
 
-`nm` is a Unix utility used to display the symbols contained in object files, executables and shared libraries.
+`nm` looks simple from the outside, but a correct implementation means understanding how an executable is actually laid out on disk and handling untrusted binary input safely.
 
-The goal of **ft_nm** is to reproduce a limited but representative subset of its behavior while implementing the underlying ELF parsing logic from scratch.
+- **Binary format parsing** — walking ELF headers, section header tables, string tables and symbol tables by hand.
+- **Defensive programming** — the input is an arbitrary file, so section header accesses are checked against the real file size instead of trusting the file's own metadata.
+- **Low-level C** — `mmap`, pointer arithmetic on raw buffers, bitmask option handling, and no dependency beyond libc and `<elf.h>`.
 
-The program reads an ELF file, navigates through its headers and sections, locates the symbol table, interprets each symbol and produces an output similar to `nm`.
+## Features
 
-### Main objectives
+- Supports **ELF32 and ELF64** (x86 / x86-64): object files, shared libraries and executables.
+- Handles **several files in one call** (prints a `file:` header for each, like `nm`).
+- Defaults to `a.out` when no file is given.
+- Symbol type letters computed from section type/flags and symbol binding (`U`, `w`/`W`, `v`/`V`, `i`, `A`, `C`, `a`, plus section-based letters).
+- Options, with their long forms:
 
-* Understand the **ELF binary format**.
-* Parse ELF structures directly from a file mapped in memory.
-* Support both **ELF32 and ELF64** binaries.
-* Locate and parse the `.symtab` section.
-* Resolve symbol names through the associated string table.
-* Determine the type of each symbol.
-* Filter symbols according to command-line options.
-* Sort symbols to reproduce `nm`like output.
+| Option | Long form | Effect |
+|--------|-----------|--------|
+| `-a` | `--debug-syms` | Show debugger-only symbols |
+| `-g` | `--extern-only` | Show only external symbols |
+| `-p` | `--no-sort` | Keep symbols in table order |
+| `-r` | `--reverse-sort` | Reverse the sort order |
+| `-u` | `--undefined-only` | Show only undefined symbols |
 
----
+  Options can be combined (`-gr`) and follow the same priority rules as the original (`-u` overrides `-g` and `-a`; `-g` overrides `-a`).
+- Clear error messages on invalid input: missing file, not an ELF file, truncated file, unknown option.
 
-## 🧠 What I learned
+## Build
 
-This project was mainly an exercise in **systems programming and binary format analysis**.
-
-### ELF internals
-
-I learned how an ELF file is organized and how its different structures are related:
-
-```text
-ELF Header
-    │
-    ├── Program Headers
-    │
-    └── Section Headers
-            │
-            ├── .symtab
-            │      └── Symbol entries
-            │
-            └── String Table
-                   └── Symbol names
+```bash
+make          # builds ./ft_nm
+make debug    # builds with -D DEBUG
+make gdb      # builds and opens gdb in TUI mode
+make re       # full rebuild
 ```
 
-The parser uses information from the ELF header to locate and interpret the section headers and symbol table.
+Compiled with `-Wall -Wextra -Werror -std=c11 -pedantic-errors`. Object files go to `.build/`, and header dependencies are tracked automatically (`-MMD -MP`), so editing a `.h` rebuilds exactly what depends on it.
 
-### Binary parsing
+## Usage
 
-Instead of treating the input as a text file, the project accesses the binary data directly in memory.
-
-The implementation handles differences between:
-
-* ELF32
-* ELF64
-* 32-bit and 64-bit structure layouts
-* different field sizes and offsets
-
-### Memory mapping
-
-Files are loaded using `mmap()` rather than being read into a manually allocated buffer.
-
-This provides direct access to the binary data and makes pointer-based parsing possible.
-
-### Symbol analysis
-
-I implemented symbol classification based on information such as:
-
-* symbol binding;
-* symbol type;
-* section type;
-* section flags;
-* special section indexes.
-
-The implementation handles several symbol categories, including:
-
-* text symbols;
-* data symbols;
-* BSS symbols;
-* read-only symbols;
-* undefined symbols;
-* absolute symbols;
-* common symbols;
-* weak symbols;
-* GNU IFUNC symbols.
-
-### Command-line parsing
-
-The project also implements a subset of `nm` options:
-
-| Option | Behavior                       |
-| ------ | ------------------------------ |
-| `-a`   | Display debugger-only symbols  |
-| `-g`   | Display external symbols       |
-| `-p`   | Do not sort symbols            |
-| `-r`   | Reverse the sort order         |
-| `-u`   | Display undefined symbols only |
-
-Some options have priority rules, for example `-u` overriding `-a` and `-g`, similarly to the behavior targeted by the project.
-
----
-
-## 🔍 How it works
-
-The general execution flow is:
-
-```text
-Command-line arguments
-        │
-        ▼
-   Parse options
-        │
-        ▼
-    Open file
-        │
-        ▼
-      mmap()
-        │
-        ▼
-   Validate ELF
-        │
-        ▼
-    Read ELF Header
-        │
-        ▼
-  Locate Section Headers
-        │
-        ▼
-    Find .symtab
-        │
-        ▼
-  Read symbol entries
-        │
-        ├── Resolve symbol name
-        │
-        ├── Determine symbol type
-        │
-        └── Apply filters
-        │
-        ▼
-     Sort symbols
-        │
-        ▼
-      Display
+```bash
+./ft_nm [option(s)] [file(s)]
+./ft_nm ./ft_nm
+./ft_nm -g libfoo.so
+./ft_nm -ur a.out other.o
 ```
 
-This separation allows the project to keep the main stages of the parser relatively independent:
+Output format: `address`, `type letter`, `name` (undefined symbols have no address).
 
-* argument handling;
-* file mapping;
-* ELF parsing;
-* symbol type detection;
-* symbol storage;
-* filtering;
-* sorting;
-* output.
+```
+0000000000001129 T main
+                 U printf
+```
 
----
+## How it works
 
-## 🏗️ Architecture
+1. **Argument parsing** — options are stored as bit flags in a single integer, and the list of files is collected separately.
+2. **File mapping** — each file is opened read-only and mapped with `mmap(PROT_READ, MAP_PRIVATE)`: no `read()` loop and no copy of the file in memory.
+3. **ELF validation** — checks the magic number and the class (32/64-bit) before touching anything else.
+4. **Symbol extraction** — locates the section header table, finds the symbol table and the string table linked to it (`sh_link`), then resolves each symbol name (`st_name`) and type.
+5. **Filtering and sorting** — symbols are stored in one structure (value, type letter, name, display flag), filtered according to the options, sorted by name then by value, and printed.
 
-The implementation is organized around several responsibilities.
+### Design choices
 
-### `arguments.c`
+- **One shared code path for 32-bit and 64-bit.** Rather than writing the parser twice, the ELF32 and ELF64 variants are generated from a single header template. `parse_elf_impls.h` includes the same generic implementation twice with different macro definitions (`ELF_POSTFIX`, `ELF_SHDR`, `ELF_SYM`, `ELF_EHDR`), and token pasting (`ELF_NAMED(x)`) turns each function into `x_elf32` / `x_elf64`, bound to the matching `Elf32_*` / `Elf64_*` types. The two versions stay identical in logic, there is no copy-paste to keep in sync, and a missing macro is a compile-time error.
+- **Zero-copy.** The file is mapped once and symbol names are pointers into that mapping, so no string is duplicated.
+- **Options as a bitmask**, read and written through small `static inline` accessors, with explicit priority rules when options conflict.
+- **One context struct** (`t_ctx`) carries all the program state (options, files, symbols, exit code), so there are no globals and cleanup happens in one place.
+- **Bounds checks as small inline helpers** (`check_offset`, `check_addr`, `next_hdr`) so that safety checks stay readable and are not skipped by accident.
 
-Handles command-line arguments and stores the selected options in a bitmask.
+## Project structure
 
-### `file.c`
-
-Responsible for opening files and mapping them into memory using `mmap()`.
-
-### `parse_elf.c`
-
-Contains the main ELF parsing logic:
-
-* ELF validation;
-* ELF32 / ELF64 detection;
-* extraction of ELF metadata;
-* section header traversal;
-* symbol table discovery;
-* symbol entry parsing.
-
-### `symbols_type.c`
-
-Determines the character used to represent each symbol according to its ELF metadata and section information.
-
-### `symbols_info.c`
-
-Stores parsed symbols and handles:
-
-* filtering;
-* alphabetical sorting;
-* value-based sorting;
-* output formatting.
-
-### `utils.h`
-
-Contains low-level helpers used to access ELF fields while accounting for the differences between ELF32 and ELF64 layouts.
-
----
-
-## 🌳 Project Structure
-
-```text
+```
 .
 ├── Makefile
-├── README.md
-├── includes
-│   ├── arguments.h
-│   ├── file.h
-│   ├── ft_nm.h
-│   ├── parse_elf.h
-│   ├── symbols_info.h
-│   ├── symbols_type.h
-│   └── utils.h
-└── srcs
+├── includes/
+│   ├── arguments.h      # option parsing
+│   ├── file.h           # file mapping
+│   ├── ft_nm.h          # shared context, option flags, pointer helpers
+│   ├── parse_elf.h      # ELF validation and parsing entry points
+│   ├── symbols_info.h   # symbol storage, sorting, display
+│   ├── symbols_type.h   # type-letter resolution
+│   ├── utils.h          # bounds-checking helpers
+│   └── template/        # shared 32/64-bit implementation
+└── srcs/
+    ├── nm.c             # main
     ├── arguments.c
     ├── file.c
-    ├── nm.c
     ├── parse_elf.c
     ├── symbols_info.c
     └── symbols_type.c
 ```
 
----
+## What I learned
 
-## ⚙️ Build
 
-The project is compiled with:
+- A symbol's name is not stored in the symbol: it is an index into a **string table located through `sh_link`**.
+- `SHT_SYMTAB` holds the full symbol table, while `SHT_DYNSYM` only holds the dynamic subset, which is why it is the one to look for.
+- Sorting depends on the **locale**.
+- **C can do generics through the preprocessor**: one parser included twice with different macros and token pasting (`ELF_NAMED`) generates both the ELF32 and ELF64 versions, at the cost of code that is harder to read.
 
-```bash
-cc -MP -MMD -Wall -Wextra -Werror -g
-```
+## Known limitations
 
-### Available Make commands
+- x86 / x86-64 little-endian only; other architectures and big-endian files are out of scope.
+- Archives (`.a`) are not supported.
+- Implements the five options listed above, not the full GNU `nm` option set.
+- Addresses are always printed on 16 hex digits, including for 32-bit files (GNU `nm` uses 8 digits there).
+- Sorting uses a selection sort (O(n²)), which is fine for typical binaries but would be the first thing to replace with `qsort` or a merge sort for very large symbol tables.
 
-```bash
-make
-```
-
-Build the project.
-
-```bash
-make clean
-```
-
-Remove generated object files.
-
-```bash
-make fclean
-```
-
-Remove object files and the executable.
-
-```bash
-make re
-```
-
-Clean and rebuild the project.
-
----
-
-## 🚀 Usage
-
-Run the program on the default `a.out` file:
-
-```bash
-./ft_nm
-```
-
-Or specify one or more binaries:
-
-```bash
-./ft_nm binary
-./ft_nm binary1 binary2
-```
-
-### Options
-
-```bash
-./ft_nm -a binary
-./ft_nm -g binary
-./ft_nm -p binary
-./ft_nm -r binary
-./ft_nm -u binary
-```
-
-Options can also be combined:
-
-```bash
-./ft_nm -gr binary
-```
-
-The output is designed to follow the general format and behavior of `nm` within the scope of the project.
-
----
-
-## 🧪 Example
-
-For an ELF binary containing symbols:
-
-```bash
-./ft_nm ./binary
-```
-
-The output follows the classic `nm`-style format:
-
-```text
-0000000000001139 T main
-0000000000004010 D global_data
-0000000000004020 B global_bss
-                 U printf
-```
-
-The exact output depends on the symbols contained in the analyzed binary and the selected options.
-
----
-
-## 🛠️ Technical Highlights
-
-### Direct ELF parsing
-
-The project does not use a high-level ELF parsing library. ELF structures are interpreted directly from the memory-mapped file.
-
-### ELF32 / ELF64 support
-
-The parser adapts field offsets and sizes depending on the ELF class.
-
-```c
-ELFCLASS32
-ELFCLASS64
-```
-
-This required taking into account differences between structures such as:
-
-```text
-Elf32_Ehdr / Elf64_Ehdr
-Elf32_Shdr / Elf64_Shdr
-Elf32_Sym  / Elf64_Sym
-```
-
-### Memory-mapped files
-
-Files are mapped with:
-
-```c
-mmap()
-```
-
-and released with:
-
-```c
-munmap()
-```
-
-This allows the parser to navigate the binary directly through memory offsets.
-
-### Symbol classification
-
-Symbol types are derived from ELF metadata rather than hardcoded from symbol names.
-
-For example, section flags are used to distinguish categories such as:
-
-```text
-.text  → T / t
-.data  → D / d
-.bss   → B / b
-.rodata → R / r
-```
-
-along with special cases such as undefined, weak, absolute and common symbols.
-
----
-
-## 📚 Resources
-
-The project was developed using the following references:
-
-* [`nm(1)` — Linux manual](https://www.man7.org/linux/man-pages/man1/nm.1.html)
-* [`elf(5)` — Linux manual](https://www.man7.org/linux/man-pages/man5/elf.5.html)
-* [System V ABI — ELF Specification](https://refspecs.linuxfoundation.org/elf/elf.pdf)
-
----
-
-## 🤖 AI Usage
+## AI Usage
 
 AI was used as a **learning and verification tool**, not as a source of implementation code.
 
@@ -400,36 +124,6 @@ I mainly used AI to:
 * generate questions to test my understanding of the ELF format;
 * challenge my reasoning about ELF structures and symbol tables;
 * suggest files and edge cases to use for testing;
-* review the README structure and presentation.
+* help draft and edit this README
 
 The implementation and debugging process were done by understanding and writing the code myself.
-
----
-
-## 🎯 What this project demonstrates
-
-**ft_nm** demonstrates practical experience with:
-
-* **C programming**
-* **Systems programming**
-* **Binary file parsing**
-* **ELF internals**
-* **Memory mapping with `mmap`**
-* **Pointer arithmetic**
-* **Bit manipulation**
-* **32-bit / 64-bit data structures**
-* **Command-line argument parsing**
-* **Symbol tables**
-* **Memory management**
-* **Error handling**
-* **Algorithmic sorting**
-
-The project was particularly valuable for understanding how tools such as `nm` can inspect a compiled binary by navigating its underlying file format rather than relying on source-level information.
-
----
-
-## 📌 Project Status
-
-The current implementation focuses on a restricted subset of `nm` functionality required by the project.
-
-The goal was not to reproduce every feature of GNU `nm`, but to build a working symbol analyzer while gaining a deeper understanding of the ELF format and low-level binary parsing.

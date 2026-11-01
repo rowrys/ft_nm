@@ -31,8 +31,8 @@ check_elf_hdr(t_ctx* ctx) {
 		ctx->exit_code = 1;
 		return (1);
 	}
-	if (!memcmp(ptr_add(ctx->file->buffer, OFFSET_EHDR(is_x64, e_type)), &et_rel, 2)
-			&& !memcmp(ptr_add(ctx->file->buffer, OFFSET_EHDR(is_x64, e_type)), &et_dyn, 2)) {
+	if (!(!memcmp(ptr_add(ctx->file->buffer, OFFSET_EHDR(is_x64, e_type)), &et_rel, 2)
+			|| !memcmp(ptr_add(ctx->file->buffer, OFFSET_EHDR(is_x64, e_type)), &et_dyn, 2))) {
 		fprintf(stderr, ERROR_MSG_FORMAT); /* Invalid file format not (.so .o x86(_64)) */
 		ctx->exit_code = 1;
 		return (1);

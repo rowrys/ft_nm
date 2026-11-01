@@ -18,7 +18,7 @@ get_large_options(t_ctx* ctx, char* opt) {
 	else if (!strcmp(opt, "-reverse-sort"))
 		set_option_stat(&(ctx->options), OPT_R, 1);
 	else if (!strcmp(opt, "-undefined-only"))
-		set_option_stat(&(ctx->options), OPT_R, 1);
+		set_option_stat(&(ctx->options), OPT_U, 1);
 	else {
 		fprintf(stderr, "nm: unrecognized option '%s'\n", opt);
 		fprintf(stderr, MSG_ERROR_INVALID_OPTION);
