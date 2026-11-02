@@ -1,16 +1,15 @@
 #include "parse_elf.h"
 #include "utils.h"
 
+#include <stdio.h>
 #include <sys/mman.h>
 #include <stdlib.h>
 
-static inline void
+static inline bool
 out_of_range(t_ctx* ctx) {
 	fprintf(stderr, MSG_ERROR_OUT_OF_RANGE, ctx->current_binary_file_path);
-	munmap(ctx->file->buffer, ctx->file->size);
-	free(ctx->binary_file_path);
-	free(ctx->symbols_info);
-	exit(1);
+	ctx->exit_code = 1;
+	return (1);
 }
 
 static bool
@@ -31,8 +30,8 @@ check_elf_hdr(t_ctx* ctx) {
 		ctx->exit_code = 1;
 		return (1);
 	}
-	if (!(!memcmp(ptr_add(ctx->file->buffer, OFFSET_EHDR(is_x64, e_type)), &et_rel, 2)
-			|| !memcmp(ptr_add(ctx->file->buffer, OFFSET_EHDR(is_x64, e_type)), &et_dyn, 2))) {
+	if (!(memcmp(ptr_add(ctx->file->buffer, OFFSET_EHDR(is_x64, e_type)), &et_rel, 2)
+			|| memcmp(ptr_add(ctx->file->buffer, OFFSET_EHDR(is_x64, e_type)), &et_dyn, 2))) {
 		fprintf(stderr, ERROR_MSG_FORMAT); /* Invalid file format not (.so .o x86(_64)) */
 		ctx->exit_code = 1;
 		return (1);
