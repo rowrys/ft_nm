@@ -1,4 +1,5 @@
 #include "ft_nm.h"
+#include "utils.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -70,11 +71,27 @@ sort_symbols_value(t_ctx* ctx) {
 	}
 }
 
+static bool
+check_symbols_name_integrity(t_ctx* ctx) {
+	size_t	bytes_before_ofr;
+
+	for (size_t i = 0; i < ctx->symbols_info_len; ++i) {
+		bytes_before_ofr = (size_t)(ctx->symbols_info[i].symbol_name) - (size_t)ctx->file;
+		if (check_addr(ctx->file, ctx->symbols_info[i].symbol_name) || !memchr(ctx->symbols_info[i].symbol_name, 0, bytes_before_ofr))
+			return (1);
+	}
+	return (0);
+}
+
 void
 display_symbols_info(t_ctx* ctx) {
 	if (ctx->nb_binary != 1) {
 		printf("\n");
 		printf("%s:\n", ctx->current_binary_file_path);
+	}
+	if (check_symbols_name_integrity(ctx)) {
+		fprintf(stderr, "nm: invalid string\n");
+		return ;
 	}
 	if (!ctx->symbols_info_len) {
 		if (!ctx->exit_code)

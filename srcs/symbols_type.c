@@ -9,7 +9,7 @@ get_type_from_progbits(uint64_t const s_hdr_flags) {
 		return ('t');
 	else if (s_hdr_flags & SHF_ALLOC)
 		return ('r');
-	return ('?');
+	return ('N');
 }
 
 static char
