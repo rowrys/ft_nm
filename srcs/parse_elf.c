@@ -46,8 +46,6 @@ static void
 parse_elf(t_ctx* ctx) {
 	if (check_elf_hdr(ctx))
 		return ;
-	if (ctx->nb_binary != 1)
-		printf("%s:\n", ctx->current_binary_file_path);
 	if (*((uchar*)ptr_add(ctx->file->buffer, EI_CLASS)) == (uchar)ELFCLASS64)
 		parse_section_hdr_elf64(ctx);
 	else
@@ -60,16 +58,11 @@ parse_all_elf(t_ctx* ctx) {
 
 	for (size_t i = 0; i < ctx->nb_binary; ++i) {
 		ctx->current_binary_file_path = ctx->binary_file_path[i];
-		if (map_file(&file, ctx->current_binary_file_path)) {
-			if (i != ctx->nb_binary - 1 && ctx->nb_binary != 1)
-				printf("\n");
+		if (map_file(&file, ctx->current_binary_file_path))
 			continue ;
-		}
 		ctx->file = &file;
 		parse_elf(ctx);
 		display_symbols_info(ctx);
-		if (i != ctx->nb_binary - 1 && ctx->nb_binary != 1)
-			printf("\n");
 		munmap(file.buffer, file.size);
 		free(ctx->symbols_info);
 		ctx->symbols_info = NULL;

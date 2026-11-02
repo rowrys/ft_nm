@@ -72,6 +72,10 @@ sort_symbols_value(t_ctx* ctx) {
 
 void
 display_symbols_info(t_ctx* ctx) {
+	if (ctx->nb_binary != 1) {
+		printf("\n");
+		printf("%s:\n", ctx->current_binary_file_path);
+	}
 	if (!ctx->symbols_info_len) {
 		if (!ctx->exit_code)
 			printf("nm: %s: no symbols\n", ctx->current_binary_file_path);
